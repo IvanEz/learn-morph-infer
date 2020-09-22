@@ -42,6 +42,8 @@ class BatchManager(object):
             # self.test_paths = self.paths[num_train:]
             # self.paths = self.paths[:num_train]
         else:
+            # list of the paths for the various training and validation data
+            # ALWAYS change self.paths / valid.paths, never change num_samples!!
             self.paths = sorted(glob("{}/{}/*".format(self.root, config.data_type[0])))
             self.valid_paths = glob("{}/*".format(self.root_val))
 
@@ -209,6 +211,7 @@ class BatchManager(object):
     #    return self.q_val.dequeue_many(self.batch_size, name='val_dequeue_operation')
 
     def batch_(self, b_num):
+        # not called
         assert(len(self.paths) % b_num == 0)
         x_batch = []
         y_batch = []

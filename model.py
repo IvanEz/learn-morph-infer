@@ -15,7 +15,7 @@ def TumorGenerator(geom,y,filters,output_shape, num_conv , repeat,arch, name = '
 
             encode_ch = 64
             input_ch = 64
-            test_choice = 3
+            test_choice = 5 #original: 3
 
             if test_choice == 0:
                 zz, _ = EncoderBE3(geom, filters, encode_ch, 'enc',
@@ -98,6 +98,10 @@ def TumorGenerator(geom,y,filters,output_shape, num_conv , repeat,arch, name = '
 
                 G_, _ = GeneratorBE3(param_geom, filters, output_shape, reuse=reuse,
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
+            elif test_choice == 5:
+                G_, _ = EncoderBE3_inverse(geom, filters, encode_ch, 'inverseNN',
+                                   num_conv=2, conv_k=3, repeat=repeat,
+                                   act=relu, reuse=reuse, alternative_output_shape=True)
 
 
         else:
@@ -377,7 +381,6 @@ def EncoderBE3(x, filters, z_num, name='enc', num_conv=3, conv_k=3, repeat=0, ac
 
 def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repeat=0, act=lrelu, reuse=False,
                alternative_output_shape=False, skip_connect=False):
-
     #z_num here: amount of layers in fully connected network (different in original architecture!!)
 
     with tf.variable_scope(name, reuse=reuse) as vs:
