@@ -400,8 +400,8 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repe
         x0 = x
         layer_num += 1
         for idx in range(repeat_num):
-            for _ in range(num_conv):
-                x = conv3d(x, filters, k=conv_k, s=1, act=act, name=str(layer_num) + '_conv')
+            for idy in range(num_conv):
+                x = conv3d(x, filters, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
                 print("Shape of inverse: " + str(get_conv_shape(x)))
                 layer_num += 1
 
@@ -415,7 +415,7 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repe
 
             print('debug.Shape of x: ', get_conv_shape(x))
             if idx < repeat_num - 1:
-                x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_conv')
+                x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2')
                 layer_num += 1
                 x0 = x
                 print("Shape of inverse: " + str(get_conv_shape(x)))
@@ -424,7 +424,8 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repe
         b = get_conv_shape(x)[0]
         flat = tf.reshape(x, [b, -1])
 
-        out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act) #fully connected layer (TODO: batch norm + dropout)
+        # fully connected layer (TODO: batch norm + dropout)
+        out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)  #TODO: too many weights here right now, change arch
         layer_num += 1
         out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)
         layer_num += 1
