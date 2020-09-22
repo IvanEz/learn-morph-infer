@@ -22,7 +22,7 @@ class Trainer3(Trainer):
                                                  num_conv=self.num_conv, repeat=self.repeat, arch=self.arch,
                                                  name='tumor', reuse=False)
 
-        self.G = denorm_img3(self.G_) # for debug
+        #self.G = denorm_img3(self.G_) # for debug
         
 
         show_all_variables()
