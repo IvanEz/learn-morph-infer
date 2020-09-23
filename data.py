@@ -47,7 +47,7 @@ class BatchManager(object):
         else:
             # list of the paths for the various training and validation data
             # ALWAYS change self.paths / valid.paths, never change num_samples!!
-            all_paths = sorted(glob("{}/*/g".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
+            all_paths = sorted(glob("{}/*/".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
             self.paths = all_paths[:4500]
             self.valid_paths = all_paths[4500:5000]
 
