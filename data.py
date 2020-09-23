@@ -117,7 +117,7 @@ class BatchManager(object):
         self.y_num = []
         '''
         self.x_range = 0 #temporary
-        self.y_range = []
+        self.y_range = [[0,1],[0,1],[0,1]]
 
         if 'ae' in config.arch:
             for i in range(self.c_num):
@@ -447,13 +447,14 @@ def inverse_preprocess_single(file_path):
     with open(file_path + "parameter_tag.pkl", "rb") as par:
         #TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
         #TODO: rounding to 6 digits?
+        paramsarray = []
         params = pickle.load(par)
-        params['uth'] = np.interp(params['uth'], [0.6, 0.8], [-1, 1]) #TODO: change range -> still uses [0.6, 0.8] range!!
-        params['Dw'] = np.interp(params['Dw'], [0.0002, 0.015], [-1, 1])
-        params['rho'] = np.interp(params['rho'], [0.002, 0.2], [-1, 1])
-        params['Tend'] = np.interp(params['Tend'], [50, 1500], [-1, 1])
-        params['icx'] = np.interp(params['icx'], [0.15, 0.7], [-1, 1])
-        params['icy'] = np.interp(params['icy'], [0.2, 0.8], [-1, 1])
-        params['icz'] = np.interp(params['icz'], [0.15, 0.7], [-1, 1])
+        paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], [-1, 1]) #TODO: change range -> still uses [0.6, 0.8] range!!
+        paramsarray[1] = np.interp(params['Dw'], [0.0002, 0.015], [-1, 1])
+        paramsarray[2] = np.interp(params['rho'], [0.002, 0.2], [-1, 1])
+        paramsarray[3] = np.interp(params['Tend'], [50, 1500], [-1, 1])
+        paramsarray[4] = np.interp(params['icx'], [0.15, 0.7], [-1, 1])
+        paramsarray[5] = np.interp(params['icy'], [0.2, 0.8], [-1, 1])
+        paramsarray[6] = np.interp(params['icz'], [0.15, 0.7], [-1, 1])
 
-    return thrvolume_resized, params
+    return thrvolume_resized, paramsarray
