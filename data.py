@@ -116,6 +116,8 @@ class BatchManager(object):
         self.y_range = []
         self.y_num = []
         '''
+        self.x_range = 0 #temporary
+        self.y_range = []
 
         if 'ae' in config.arch:
             for i in range(self.c_num):
@@ -159,7 +161,9 @@ class BatchManager(object):
                 while not coord.should_stop():
                     id = rng.randint(len(paths))
                     val_id = rng.randint(len(valid_paths))
-                    x_, y_, geom_, x_val_, y_val_, geom_val_ = preprocess(paths[id], data_type, x_range, y_range, valid_paths[val_id])
+                    #x_, y_, geom_, x_val_, y_val_, geom_val_ = preprocess(paths[id], data_type, x_range, y_range, valid_paths[val_id])
+                    x_, geom_, x_val_, geom_val_ = inverse_preprocess(paths[id], valid_paths[val_id])
+                    y_, y_val_ = [], [] #temporary solution
 
                     #geom_ = x_[...,1:]
                     #x_ = np.expand_dims(x_[..., 0], axis=3)
