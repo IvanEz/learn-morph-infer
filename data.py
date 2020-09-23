@@ -73,8 +73,9 @@ class BatchManager(object):
         self.c_num = 3
 
         if self.is_3d:
-            feature_dim = [self.res_z, self.res_y, self.res_x, self.depth]
-            geom_dim = [self.res_z, self.res_y, self.res_x, 3]
+            #feature_dim = [self.res_z, self.res_y, self.res_x, self.depth]
+            feature_dim = [7]
+            geom_dim = [self.res_z, self.res_y, self.res_x, 1] #dimension of input: 128x128x128x1 (if other scans used: 3)
         else:
             feature_dim = [self.res_y, self.res_x, self.depth]
         
