@@ -64,7 +64,7 @@ class Trainer3(Trainer):
             tf.summary.scalar("loss/g_loss_l1", self.g_loss_l1),
             tf.summary.scalar('misc/q', self.batch_manager.q.size()),
 
-            tf.summary.histogram("y", self.y),
+            #tf.summary.histogram("y", self.y),
 
             tf.summary.scalar("misc/g_lr", self.g_lr),
         ]

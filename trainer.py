@@ -59,6 +59,7 @@ class Trainer(object):
                 self.output_shape = get_conv_shape(self.x)[1:-1] + [1]
         else:
             self.output_shape = get_conv_shape(self.x)[1:]
+            print(self.output_shape)
 
         self.optimizer = config.optimizer
         self.beta1 = config.beta1
