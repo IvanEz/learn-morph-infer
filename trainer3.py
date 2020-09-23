@@ -62,13 +62,13 @@ class Trainer3(Trainer):
         # summary
         summary = [
             
-            tf.summary.scalar("loss/g_loss", self.g_loss),
+            #tf.summary.scalar("loss/g_loss", self.g_loss),
             #tf.summary.scalar("loss/g_loss_l1", self.g_loss_l1),
-            tf.summary.scalar('misc/q', self.batch_manager.q.size()),
+            #tf.summary.scalar('misc/q', self.batch_manager.q.size()),
 
             #tf.summary.histogram("y", self.y),
 
-            tf.summary.scalar("misc/g_lr", self.g_lr),
+            #tf.summary.scalar("misc/g_lr", self.g_lr),
         ]
         '''
         if 'dg' in self.arch:
