@@ -116,8 +116,8 @@ class BatchManager(object):
         self.y_range = []
         self.y_num = []
         '''
-        self.x_range = 0 #temporary
-        self.y_range = [[0,1],[0,1],[0,1]]
+        #self.x_range = 0 #temporary
+        #self.y_range = [[0,1],[0,1],[0,1]]
 
         if 'ae' in config.arch:
             for i in range(self.c_num):
