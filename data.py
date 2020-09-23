@@ -22,6 +22,7 @@ class BatchManager(object):
         self.root_val = config.valid_dataset_dir
         # read data generation arguments
         self.args = {}
+        '''
         with open(os.path.join(self.root, 'args.txt'), 'r') as f:
             while True:
                 line = f.readline()
@@ -29,7 +30,7 @@ class BatchManager(object):
                     break
                 arg, arg_value = line[:-1].split(': ')
                 self.args[arg] = arg_value
-
+        '''
         self.is_3d = config.is_3d
         if 'ae' in config.arch:
             def sortf(x):
@@ -68,7 +69,8 @@ class BatchManager(object):
         self.res_y = config.res_y
         self.res_z = config.res_z
         self.depth = depth
-        self.c_num = int(self.args['num_param'])
+        #self.c_num = int(self.args['num_param'])
+        self.c_num = 3
 
         if self.is_3d:
             feature_dim = [self.res_z, self.res_y, self.res_x, self.depth]
@@ -123,6 +125,7 @@ class BatchManager(object):
             for i in range(label_dim[0]):
                 self.y_range.append([-1, 1])
         else:
+            '''
             print(self.c_num)
             for i in range(self.c_num):
                 p_name = self.args['p%d' % i]
@@ -132,6 +135,7 @@ class BatchManager(object):
                 self.y_range.append([p_min, p_max])
                 self.y_num.append(p_num)
             print("initial_range", self.y_range)
+            '''
     def __del__(self):
         try:
             self.stop_thread()
