@@ -27,14 +27,15 @@ class Trainer(object):
             self.xtw, self.ytw = batch_manager.test_batch(is_window=True)
             self.xw, self.yw = batch_manager.batch(is_window=True)            
         else:
-            if self.is_3d:
+            if not self.is_3d:
                 #self.x_jaco, self.x_vort = jacobian3(self.x)
                 #self.x_jaco = jacobian3tumor(self.x)
                 #self.x_jaco_val = jacobian3tumor(self.x_val)
-                print("no jacobbian3tumor exec")
-
-            else:
                 self.x_jaco, self.x_vort = jacobian(self.x)
+            #else:
+                # self.x_jaco, self.x_vort = jacobian3(self.x)
+                # self.x_jaco = jacobian3tumor(self.x)
+                # self.x_jaco_val = jacobian3tumor(self.x_val)
 
         self.res_x = config.res_x
         self.res_y = config.res_y

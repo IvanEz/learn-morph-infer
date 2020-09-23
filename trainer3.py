@@ -214,7 +214,7 @@ class Trainer3(Trainer):
 #                                     num_conv=self.num_conv, repeat=self.repeat, reuse=True)        
     
     def generate(self, inputs, gt_list, root_path=None, idx=None):
-
+        #not called
 
         xym, zym = self.sess.run([self.G['xym'], self.G['zym']], {self.geom:gt_list["geom"],
                                                                   self.y: inputs[0]})

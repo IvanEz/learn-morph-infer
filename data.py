@@ -155,8 +155,7 @@ class BatchManager(object):
 
         # Create a method for loading and enqueuing
         def load_n_enqueue(sess, enqueue, coord, paths, rng,
-                           x, y, geom, data_type, x_range, y_range,
-                           valid_paths, x_val, y_val, geom_val):
+                           x, geom, valid_paths, x_val, geom_val):
             with coord.stop_on_exception():                
                 while not coord.should_stop():
                     id = rng.randint(len(paths))
@@ -169,7 +168,7 @@ class BatchManager(object):
                     #geom_ = x_[...,1:]
                     #x_ = np.expand_dims(x_[..., 0], axis=3)
                     #print(x_.shape, y_.shape)
-                    sess.run(enqueue, feed_dict={x: x_, y: y_, geom: geom_, x_val: x_val_, y_val: y_val_, geom_val: geom_val_})
+                    sess.run(enqueue, feed_dict={x: x_, geom: geom_, x_val: x_val_, geom_val: geom_val_})
 
         # Create threads that enqueue
         self.threads = [threading.Thread(target=load_n_enqueue, 
@@ -179,14 +178,9 @@ class BatchManager(object):
                                                 self.paths,
                                                 self.rng,
                                                 self.x,
-                                                self.y,
                                                 self.geom,
-                                                self.data_type,
-                                                self.x_range,
-                                                self.y_range,
                                                 self.valid_paths,
                                                 self.x_val,
-                                                self.y_val,
                                                 self.geom_val,
                                                 )
                                           ) for i in range(self.num_threads)]
