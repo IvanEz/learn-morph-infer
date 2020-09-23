@@ -29,8 +29,8 @@ class Trainer(object):
         else:
             if self.is_3d:
                 #self.x_jaco, self.x_vort = jacobian3(self.x)
-                self.x_jaco = jacobian3tumor(self.x)
-                self.x_jaco_val = jacobian3tumor(self.x_val)
+                #self.x_jaco = jacobian3tumor(self.x)
+                #self.x_jaco_val = jacobian3tumor(self.x_val)
 
             else:
                 self.x_jaco, self.x_vort = jacobian(self.x)
