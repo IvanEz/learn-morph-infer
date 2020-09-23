@@ -437,7 +437,7 @@ def inverse_preprocess_single(file_path):
         thrvolume = data['thr_data']
         thrvolume_resized = np.delete(np.delete(np.delete(thrvolume, 128, 0), 128, 1), 128, 2) #from 129x129x129 to 128x128x128
         #TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
-        np.expand_dims(thrvolume_resized, -1) #now it is 128x128x128x1
+        thrvolume_resized = np.expand_dims(thrvolume_resized, -1) #now it is 128x128x128x1
 
     with open(file_path + "parameter_tag.pkl", "rb") as par:
         #TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
