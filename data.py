@@ -91,22 +91,22 @@ class BatchManager(object):
             min_after_dequeue = 5000
         capacity = min_after_dequeue + 3 * self.batch_size
         #self.q = tf.FIFOQueue(capacity, [tf.float32, tf.float32], [feature_dim, label_dim])
-        self.q = tf.FIFOQueue(capacity, [tf.float32, tf.float32, tf.float32, tf.float32, tf.float32, tf.float32], [feature_dim, label_dim, geom_dim, feature_dim, label_dim, geom_dim])
+        self.q = tf.FIFOQueue(capacity, [tf.float32, tf.float32, tf.float32, tf.float32], [feature_dim, geom_dim, feature_dim, geom_dim])
         self.x = tf.placeholder(dtype=tf.float32, shape=feature_dim)
         #print("here               ",feature_dim, label_dim)
-        self.y = tf.placeholder(dtype=tf.float32, shape=label_dim)
+        #self.y = tf.placeholder(dtype=tf.float32, shape=label_dim)
         self.geom = tf.placeholder(dtype=tf.float32, shape=geom_dim)
 
         # self.q_val = tf.FIFOQueue(capacity, [tf.float32, tf.float32, tf.float32], [feature_dim, label_dim, geom_dim],
         #                         name='fifo_queue_val')
         self.x_val = tf.placeholder(dtype=tf.float32, shape=feature_dim, name='x_val_placeholder')
         # print("here               ",feature_dim, label_dim)
-        self.y_val = tf.placeholder(dtype=tf.float32, shape=label_dim, name='y_val_placeholder')
+        #self.y_val = tf.placeholder(dtype=tf.float32, shape=label_dim, name='y_val_placeholder')
         self.geom_val = tf.placeholder(dtype=tf.float32, shape=geom_dim, name='geom_val_placeholder')
         # self.enqueue_val = self.q_val.enqueue([self.x_val, self.y_val, self.geom_val], name='enqueue_val_operation')
         # self.num_threads_val = 1  # TODO: this is hardcoded for the time being
 
-        self.enqueue = self.q.enqueue([self.x, self.y, self.geom, self.x_val, self.y_val, self.geom_val])
+        self.enqueue = self.q.enqueue([self.x, self.geom, self.x_val, self.geom_val])
         self.num_threads = np.amin([config.num_worker, multiprocessing.cpu_count(), self.batch_size])
 
 

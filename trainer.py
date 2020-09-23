@@ -14,7 +14,7 @@ class Trainer(object):
         self.config = config
 
         self.batch_manager = batch_manager
-        self.x, self.y, self.geom, self.x_val, self.y_val, self.geom_val = batch_manager.batch() # normalized input
+        self.x, self.geom, self.x_val, self.geom_val = batch_manager.batch() # normalized input
         #self.x_val, self.y_val, self.geom_val = batch_manager.batch_val()  # normalized input
 
         self.is_3d = config.is_3d

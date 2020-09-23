@@ -44,6 +44,7 @@ class Trainer3(Trainer):
 
         self.g_loss = self.g_loss_l1
 
+        '''
         if 'dg' in self.arch:
             self.g_loss_real = tf.reduce_mean(tf.square(self.D_G-1))
             self.d_loss_fake = tf.reduce_mean(tf.square(self.D_G))
@@ -53,6 +54,7 @@ class Trainer3(Trainer):
 
             self.d_loss = self.d_loss_real + self.d_loss_fake
             self.d_optim = g_optimizer.minimize(self.d_loss, var_list=self.D_var)
+        '''
 
         self.g_optim = g_optimizer.minimize(self.g_loss, global_step=self.step, var_list=self.G_var)
         #self.epoch = tf.placeholder(tf.float32)
@@ -68,14 +70,14 @@ class Trainer3(Trainer):
 
             tf.summary.scalar("misc/g_lr", self.g_lr),
         ]
-
+        '''
         if 'dg' in self.arch:
             summary += [
                 tf.summary.scalar("loss/g_loss_real", tf.sqrt(self.g_loss_real)),
                 tf.summary.scalar("loss/d_loss_real", tf.sqrt(self.d_loss_real)),
                 tf.summary.scalar("loss/d_loss_fake", tf.sqrt(self.d_loss_fake)),
             ]
-
+        '''
         self.writer_val = tf.summary.FileWriter(self.model_dir + "/val")
         self.summary_op = tf.summary.merge_all()
 
