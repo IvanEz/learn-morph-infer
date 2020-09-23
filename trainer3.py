@@ -38,10 +38,11 @@ class Trainer3(Trainer):
 
         # losses
 
-        self.g_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.x>=0.001] - self.x[self.x>=0.001]), name='g_loss_l1')
-        self.g_csf_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.geom[...,2]>=0.001] - self.x[self.geom[...,2]>=0.001]), name='g_csf_loss_l1')
+        #self.g_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.x>=0.001] - self.x[self.x>=0.001]), name='g_loss_l1')
+        self.g_loss_l1 = tf.reduce_mean(tf.abs(self.G_ - self.x), name='g_loss_l1')
+        #self.g_csf_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.geom[...,2]>=0.001] - self.x[self.geom[...,2]>=0.001]), name='g_csf_loss_l1')
 
-        self.g_loss = self.g_loss_l1 + self.g_csf_loss_l1
+        self.g_loss = self.g_loss_l1
 
         if 'dg' in self.arch:
             self.g_loss_real = tf.reduce_mean(tf.square(self.D_G-1))
@@ -99,6 +100,7 @@ class Trainer3(Trainer):
             self.train_()
 
     def train_(self):
+        '''
         # test1: varying on each axis
         z_range = [0, 1]
         z_shape = (self.b_num, self.c_num)
@@ -146,6 +148,7 @@ class Trainer3(Trainer):
         #print("here2")
         z_samples.append(np.asarray(gen_list['z_val']))
         #print("here3", z_samples[1:])
+        '''
 
         # call once
         print('debughere2.5')
@@ -182,9 +185,9 @@ class Trainer3(Trainer):
                 self.writer_val.add_summary(summary_once, global_step=step)
                 self.writer_val.flush()
 
-            if step % self.test_step == 0 or step == self.max_step-1:
+            #if step % self.test_step == 0 or step == self.max_step-1:
 
-                self.generate(z_samples[1:], gen_list, self.model_dir, idx=step)
+            #    self.generate(z_samples[1:], gen_list, self.model_dir, idx=step)
 
             if self.lr_update == 'step':
                 if step % self.lr_update_step == self.lr_update_step - 1:

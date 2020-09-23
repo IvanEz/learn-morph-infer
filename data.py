@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 from ops import *
 
+import pickle
+
 class BatchManager(object):
     def __init__(self, config):
         self.rng = np.random.RandomState(config.random_seed)
@@ -44,8 +46,9 @@ class BatchManager(object):
         else:
             # list of the paths for the various training and validation data
             # ALWAYS change self.paths / valid.paths, never change num_samples!!
-            self.paths = sorted(glob("{}/{}/*".format(self.root, config.data_type[0])))
-            self.valid_paths = glob("{}/*".format(self.root_val))
+            all_paths = sorted(glob("{}/*".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
+            self.paths = all_paths[:4500]
+            self.valid_paths = all_paths[4500:5000]
 
         self.num_samples = len(self.paths)
         self.num_samples_validation = len(self.valid_paths)
@@ -418,3 +421,28 @@ def preprocess(file_path, data_type, x_range, y_range, val_path):
     # print("processed", y)
     return x, [round(elem, 2) for elem in y], geom, val_x, [round(elem, 2) for elem in val_y], val_geom
 
+def inverse_preprocess(file_path, val_path):
+    a, b = inverse_preprocess_single(file_path)
+    c, d = inverse_preprocess_single(val_path)
+    return a, b, c, d
+
+def inverse_preprocess_single(file_path):
+    # paths point to directory with files
+    with np.load(file_path + "Data_0001.npz") as data:
+        thrvolume = data['thr_data']
+        thrvolume_resized = np.delete(np.delete(np.delete(thrvolume, 128, 0), 128, 1), 128, 2) #from 129x129x129 to 128x128x128
+        #TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
+
+    with open(file_path + "parameter_tag.pkl", "rb") as par:
+        #TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
+        #TODO: rounding to 6 digits?
+        params = pickle.load(par)
+        params['uth'] = np.interp(params['uth'], [0.6, 0.8], [-1, 1]) #TODO: change range -> still uses [0.6, 0.8] range!!
+        params['Dw'] = np.interp(params['Dw'], [0.0002, 0.015], [-1, 1])
+        params['rho'] = np.interp(params['rho'], [0.002, 0.2], [-1, 1])
+        params['Tend'] = np.interp(params['Tend'], [50, 1500], [-1, 1])
+        params['icx'] = np.interp(params['icx'], [0.15, 0.7], [-1, 1])
+        params['icy'] = np.interp(params['icy'], [0.2, 0.8], [-1, 1])
+        params['icz'] = np.interp(params['icz'], [0.15, 0.7], [-1, 1])
+
+    return thrvolume_resized, params

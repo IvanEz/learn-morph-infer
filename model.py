@@ -382,6 +382,7 @@ def EncoderBE3(x, filters, z_num, name='enc', num_conv=3, conv_k=3, repeat=0, ac
 def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repeat=0, act=lrelu, reuse=False,
                alternative_output_shape=False, skip_connect=False):
     #z_num here: amount of layers in fully connected network (different in original architecture!!)
+    #Current state: experimental / first basic architecture
 
     with tf.variable_scope(name, reuse=reuse) as vs:
 
