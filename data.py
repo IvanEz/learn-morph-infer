@@ -109,11 +109,12 @@ class BatchManager(object):
         self.num_threads = np.amin([config.num_worker, multiprocessing.cpu_count(), self.batch_size])
 
 
-
+        '''
         r = np.loadtxt(os.path.join(self.root, self.data_type[0]+'_range.txt'))
         self.x_range = max(abs(r[0]), abs(r[1]))
         self.y_range = []
         self.y_num = []
+        '''
 
         if 'ae' in config.arch:
             for i in range(self.c_num):
