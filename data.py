@@ -163,7 +163,7 @@ class BatchManager(object):
                     val_id = rng.randint(len(valid_paths))
                     #x_, y_, geom_, x_val_, y_val_, geom_val_ = preprocess(paths[id], data_type, x_range, y_range, valid_paths[val_id])
                     #x_, geom_, x_val_, geom_val_ = inverse_preprocess(paths[id], valid_paths[val_id])
-                    geom_, x_, geom_val, x_val_ = inverse_preprocess(paths[id], valid_paths[val_id])
+                    geom_, x_, geom_val_, x_val_ = inverse_preprocess(paths[id], valid_paths[val_id])
                     y_, y_val_ = [], [] #temporary solution
 
                     #geom_ = x_[...,1:]
