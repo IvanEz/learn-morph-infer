@@ -153,7 +153,9 @@ class Trainer3(Trainer):
         # call once
         print('debughere2.5')
         summary_once = self.sess.run(self.summary_op)
+        print('debughere2.6')
         self.summary_writer.add_summary(summary_once, 0)
+        print('debughere2.7')
         self.summary_writer.flush()
         print('debug,here3')
 
