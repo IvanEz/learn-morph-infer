@@ -3,7 +3,7 @@ import tensorflow as tf
 from ops import *
 
 
-def TumorGenerator(geom,y,filters,output_shape, num_conv , repeat,arch, name = 'tumor', reuse=tf.AUTO_REUSE ):
+def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, name = 'tumor', reuse=tf.AUTO_REUSE ):
 
     with tf.variable_scope(name, reuse=reuse) as vs:
         if arch == 'alternative':

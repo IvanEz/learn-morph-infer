@@ -18,7 +18,7 @@ class Trainer3(Trainer):
             _, self.G_ = jacobian3(self.G_s)
         else:
 
-            self.G_, self.G_var = TumorGenerator(self.geom, self.y, self.filters, self.output_shape,
+            self.G_, self.G_var = TumorGenerator(self.geom, self.filters, self.output_shape,
                                                  num_conv=self.num_conv, repeat=self.repeat, arch=self.arch,
                                                  name='tumor', reuse=False)
 
