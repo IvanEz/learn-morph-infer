@@ -100,8 +100,9 @@ def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, name = 'tu
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
             elif test_choice == 5:
                 G_, _ = EncoderBE3_inverse(geom, filters, encode_ch, 'inverseNN',
-                                   num_conv=2, conv_k=3, repeat=repeat,
+                                   num_conv=3, conv_k=3, repeat=repeat,
                                    act=relu, reuse=reuse, alternative_output_shape=True)
+                #num_conv=2
 
 
         else:
@@ -390,8 +391,8 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repe
         x_shape = get_conv_shape(x)[1:]
 
         #repeat_num = int(np.log2(np.max(x_shape[:-1]))) - 2
-        repeat_num = 5 #repeat_num - 1 times we half the dimension (4 times): 128 -> 64 -> 32 -> 16 -> 8
-
+        repeat_num = 6 #repeat_num - 1 times we half the dimension (4 times): 128 -> 64 -> 32 -> 16 -> 8
+        #repeat_num = 5
         assert (repeat_num > 0 and np.sum([i % np.power(2, repeat_num - 1) for i in x_shape[:-1]]) == 0)
 
         ch = filters
