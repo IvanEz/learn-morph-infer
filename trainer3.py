@@ -40,9 +40,10 @@ class Trainer3(Trainer):
 
         #self.g_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.x>=0.001] - self.x[self.x>=0.001]), name='g_loss_l1')
         self.g_loss_l1 = tf.reduce_mean(tf.abs(self.G_ - self.x), name='g_loss_l1')
+        self.g_loss_l2 = tf.reduce_mean(tf.square(self.G_ - self.x), name='g_loss_l2')
         #self.g_csf_loss_l1 = tf.reduce_mean(tf.abs(self.G_[self.geom[...,2]>=0.001] - self.x[self.geom[...,2]>=0.001]), name='g_csf_loss_l1')
 
-        self.g_loss = self.g_loss_l1
+        self.g_loss = self.g_loss_l2
 
         '''
         if 'dg' in self.arch:
