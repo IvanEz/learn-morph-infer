@@ -273,14 +273,14 @@ class Trainer3(Trainer):
 
         # for placeholder based implementation
         #paths = self.config.data_dir
-        paths = sorted(glob("{}/*/".format(self.config.data_dir)))
+        paths = sorted(glob("{}/*/".format(self.config.data_dir + "/" + self.config.dataset)))
         # start = time.time()
         y_list = []
         geom_list = []
         filenames = []
         for path in paths:
             #x_, y_, geom_ = self._preprocess(paths + path, "v", self.x_range, self.y_range)
-            x_, geom_ = inverse_preprocess_single(path)
+            geom_, x_ = inverse_preprocess_single(path)
             Gz_ = self.sess.run(self.Gz_, {self.geom_z: np.expand_dims(geom_, 0)})
             Gz_, _ = self.batch_manager.denorm(x=Gz_)
 
