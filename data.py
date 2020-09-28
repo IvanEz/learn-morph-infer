@@ -454,3 +454,12 @@ def inverse_preprocess_single(file_path):
         paramsarray[6] = np.interp(params['icz'], [0.15, 0.7], [-1, 1])
 
     return thrvolume_resized, paramsarray
+
+def inverse_postprocess_single(params):
+    params[0] = np.interp(params[0], [-1, 1], [0.6, 0.8])
+    params[1] = np.interp(params[1], [-1, 1], [0.0002, 0.015])
+    params[2] = np.interp(params[2], [-1, 1], [0.002, 0.2])
+    params[3] = np.interp(params[3], [-1, 1], [50, 1500])
+    params[4] = np.interp(params[4], [-1, 1], [0.15, 0.7])
+    params[5] = np.interp(params[5], [-1, 1], [0.2, 0.8])
+    params[6] = np.interp(params[6], [-1, 1], [0.15, 0.7])
