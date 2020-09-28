@@ -9,6 +9,7 @@ import time
 from model import *
 from util import *
 from trainer import Trainer
+from data import inverse_preprocess_single
 
 class Trainer3(Trainer):
     def build_model(self):
@@ -255,33 +256,35 @@ class Trainer3(Trainer):
         
 
     def build_test_model(self):
-        self.z = tf.placeholder(dtype=tf.float32, shape=[self.test_b_num, self.c_num])
-        self.geom_z = tf.placeholder(dtype=tf.float32, shape=[self.test_b_num, self.res_z, self.res_y, self.res_x, 3])
+        #self.z = tf.placeholder(dtype=tf.float32, shape=[self.test_b_num, self.c_num])
+        self.geom_z = tf.placeholder(dtype=tf.float32, shape=[self.test_b_num, self.res_z, self.res_y, self.res_x, 1])
 
-        self.Gz_, _ = TumorGenerator(self.geom_z, self.z, self.filters, self.output_shape,
+        self.Gz_, _ = TumorGenerator(self.geom_z, self.filters, self.output_shape,
                                                  num_conv=self.num_conv, repeat=self.repeat, arch=self.arch,
                                                  name='tumor', reuse=tf.AUTO_REUSE)
 
     def test(self):
 
-        self.f = 1.0
-        self.x_range = self.f
-        self.y_range = [[0.0003, 0.0009], [0.0051, 0.0299], [0.0, 20.0]]
+        #self.f = 1.0
+        #self.x_range = self.f
+        #self.y_range = [[0.0003, 0.0009], [0.0051, 0.0299], [0.0, 20.0]]
 
         self.build_test_model()
 
         # for placeholder based implementation
-        paths = self.config.data_dir + "v/"
+        #paths = self.config.data_dir
+        paths = sorted(glob("{}/*/".format(self.config.data_dir)))
         # start = time.time()
         y_list = []
         geom_list = []
         filenames = []
-        for k, path in enumerate(os.listdir(paths)):
-            x_, y_, geom_ = self._preprocess(paths + path, "v", self.x_range, self.y_range)
-            Gz_ = self.sess.run(self.Gz_, {self.z: np.expand_dims(y_, 0), self.geom_z: np.expand_dims(geom_, 0)})
+        for path in paths:
+            #x_, y_, geom_ = self._preprocess(paths + path, "v", self.x_range, self.y_range)
+            x_, geom_ = inverse_preprocess_single(path)
+            Gz_ = self.sess.run(self.Gz_, {self.geom_z: np.expand_dims(geom_, 0)})
             Gz_, _ = self.batch_manager.denorm(x=Gz_)
 
-            np.savez_compressed(self.config.inf_save + path, x=Gz_)
+            #np.savez_compressed(self.config.inf_save + path, x=Gz_)
 
     def _preprocess(self, file_path, data_type, x_range, y_range):
         with np.load(file_path) as data:
@@ -311,3 +314,6 @@ class Trainer3(Trainer):
             # y[i] = y[i]/ri[1]
         # print("processed", y)
         return x, [round(elem, 2) for elem in y], geom
+
+    def inverse_denorm(self, x):
+        print(x)
