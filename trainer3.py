@@ -274,7 +274,8 @@ class Trainer3(Trainer):
 
         # for placeholder based implementation
         #paths = self.config.data_dir
-        paths = sorted(glob("{}/*/".format(self.config.data_dir + "/" + self.config.dataset)))
+        datasetpath = self.config.data_dir + "/" + self.config.dataset
+        paths = sorted(glob("{}/*/".format(datasetpath)))
         # start = time.time()
         y_list = []
         geom_list = []
@@ -286,6 +287,10 @@ class Trainer3(Trainer):
             Gz_ = inverse_postprocess_single(Gz_[0])
             print(Gz_)
 
+            fh = open(self.config.inf_save + "/" + path[len(datasetpath):] + "/inferred_parameters.pkl", "wb")
+            inferred = {'uth': Gz_[0], 'Dw': Gz_[1], 'rho': Gz_[2], 'Tend': Gz_[3], 'icx': Gz_[4], 'icy': Gz_[5], 'icz': Gz_[6]}
+            pickle.dump(inferred, fh)
+            fh.close()
             #np.savez_compressed(self.config.inf_save + path, x=Gz_)
 
     def _preprocess(self, file_path, data_type, x_range, y_range):
