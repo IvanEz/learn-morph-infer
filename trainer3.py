@@ -283,7 +283,7 @@ class Trainer3(Trainer):
             #x_, y_, geom_ = self._preprocess(paths + path, "v", self.x_range, self.y_range)
             geom_, x_ = inverse_preprocess_single(path)
             Gz_ = self.sess.run(self.Gz_, {self.geom_z: np.expand_dims(geom_, 0)})
-            Gz_ = inverse_postprocess_single(Gz_)
+            Gz_ = inverse_postprocess_single(Gz_[0])
             print(Gz_)
 
             #np.savez_compressed(self.config.inf_save + path, x=Gz_)
