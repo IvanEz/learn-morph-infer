@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import trange
 from datetime import datetime
 import time
-
+import pickle
 from model import *
 from util import *
 from trainer import Trainer
@@ -287,7 +287,7 @@ class Trainer3(Trainer):
             Gz_ = inverse_postprocess_single(Gz_[0])
             print(Gz_)
 
-            fh = open(self.config.inf_save + "/" + path[len(datasetpath):] + "/inferred_parameters.pkl", "wb")
+            fh = open(self.config.inf_save + path[len(datasetpath):] + "inferred_parameters.pkl", "wb")
             inferred = {'uth': Gz_[0], 'Dw': Gz_[1], 'rho': Gz_[2], 'Tend': Gz_[3], 'icx': Gz_[4], 'icy': Gz_[5], 'icz': Gz_[6]}
             pickle.dump(inferred, fh)
             fh.close()
