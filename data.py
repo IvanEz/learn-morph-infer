@@ -15,6 +15,8 @@ from ops import *
 
 import pickle
 
+normalization_range = [-100, 100]
+
 class BatchManager(object):
     def __init__(self, config):
         self.rng = np.random.RandomState(config.random_seed)
@@ -445,22 +447,22 @@ def inverse_preprocess_single(file_path):
         #TODO: rounding to 6 digits?
         paramsarray = [float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN")]
         params = pickle.load(par)
-        paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], [-1, 1]) #TODO: change range -> still uses [0.6, 0.8] range!!
-        paramsarray[1] = np.interp(params['Dw'], [0.0002, 0.015], [-1, 1])
-        paramsarray[2] = np.interp(params['rho'], [0.002, 0.2], [-1, 1])
-        paramsarray[3] = np.interp(params['Tend'], [50, 1500], [-1, 1])
-        paramsarray[4] = np.interp(params['icx'], [0.15, 0.7], [-1, 1])
-        paramsarray[5] = np.interp(params['icy'], [0.2, 0.8], [-1, 1])
-        paramsarray[6] = np.interp(params['icz'], [0.15, 0.7], [-1, 1])
+        paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], normalization_range) #TODO: change range -> still uses [0.6, 0.8] range!!
+        paramsarray[1] = np.interp(params['Dw'], [0.0002, 0.015], normalization_range)
+        paramsarray[2] = np.interp(params['rho'], [0.002, 0.2], normalization_range)
+        paramsarray[3] = np.interp(params['Tend'], [50, 1500], normalization_range)
+        paramsarray[4] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
+        paramsarray[5] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
+        paramsarray[6] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
 
     return thrvolume_resized, paramsarray
 
 def inverse_postprocess_single(params):
-    params[0] = np.interp(params[0], [-1, 1], [0.6, 0.8])
-    params[1] = np.interp(params[1], [-1, 1], [0.0002, 0.015])
-    params[2] = np.interp(params[2], [-1, 1], [0.002, 0.2])
-    params[3] = np.interp(params[3], [-1, 1], [50, 1500])
-    params[4] = np.interp(params[4], [-1, 1], [0.15, 0.7])
-    params[5] = np.interp(params[5], [-1, 1], [0.2, 0.8])
-    params[6] = np.interp(params[6], [-1, 1], [0.15, 0.7])
+    params[0] = np.interp(params[0], normalization_range, [0.6, 0.8])
+    params[1] = np.interp(params[1], normalization_range, [0.0002, 0.015])
+    params[2] = np.interp(params[2], normalization_range, [0.002, 0.2])
+    params[3] = np.interp(params[3], normalization_range, [50, 1500])
+    params[4] = np.interp(params[4], normalization_range, [0.15, 0.7])
+    params[5] = np.interp(params[5], normalization_range, [0.2, 0.8])
+    params[6] = np.interp(params[6], normalization_range, [0.15, 0.7])
     return params
