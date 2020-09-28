@@ -463,3 +463,4 @@ def inverse_postprocess_single(params):
     params[4] = np.interp(params[4], [-1, 1], [0.15, 0.7])
     params[5] = np.interp(params[5], [-1, 1], [0.2, 0.8])
     params[6] = np.interp(params[6], [-1, 1], [0.15, 0.7])
+    return params
