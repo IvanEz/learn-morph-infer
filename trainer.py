@@ -45,6 +45,8 @@ class Trainer(object):
         self.test_b_num = config.test_batch_size
         self.val_set_size = batch_manager.num_samples_validation
 
+        self.outputparams = config.outputparams
+
         self.repeat = config.repeat
         self.filters = config.filters
         self.num_conv = config.num_conv

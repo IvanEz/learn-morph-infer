@@ -43,6 +43,10 @@ data_arg.add_argument('--test_batch_size', type=int, default=100)
 data_arg.add_argument('--num_worker', type=int, default=2)
 data_arg.add_argument('--data_type', type=str, default='velocity')
 
+#inverse
+inv_arg = add_argument_group('Inverse')
+inv_arg.add_argument('--outputparams', type=int, default=7)
+
 # Training / test parameters
 train_arg = add_argument_group('Training')
 train_arg.add_argument('--is_train', type=str2bool, default=True)

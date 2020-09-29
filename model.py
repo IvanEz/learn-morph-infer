@@ -3,7 +3,7 @@ import tensorflow as tf
 from ops import *
 
 
-def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, name = 'tumor', reuse=tf.AUTO_REUSE ):
+def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputparams, name = 'tumor', reuse=tf.AUTO_REUSE ):
 
     with tf.variable_scope(name, reuse=reuse) as vs:
         if arch == 'alternative':
@@ -100,7 +100,7 @@ def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, name = 'tu
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
             elif test_choice == 5:
                 sizeFC = 64
-                G_, _ = EncoderBE3_inverse(geom, filters, sizeFC, 'inverseNN',
+                G_, _ = EncoderBE3_inverse(geom, filters, sizeFC, 'inverseNN', outputparams,
                                    num_conv=num_conv - 1, conv_k=3, repeat=repeat,
                                    act=lrelu, reuse=reuse, alternative_output_shape=True)
                 #num_conv=2
@@ -381,7 +381,7 @@ def EncoderBE3(x, filters, z_num, name='enc', num_conv=3, conv_k=3, repeat=0, ac
     variables = tf.contrib.framework.get_variables(vs)
     return out, variables
 
-def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repeat=0, act=lrelu, reuse=False,
+def EncoderBE3_inverse(x, filters, z_num, name='enc', outputparams=7, num_conv=2, conv_k=3, repeat=0, act=lrelu, reuse=False,
                alternative_output_shape=False, skip_connect=False):
     #z_num here: amount of layers in fully connected network (different in original architecture!!)
     #Current state: experimental / first basic architecture
@@ -432,7 +432,7 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', num_conv=2, conv_k=3, repe
         layer_num += 1
         out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)
         layer_num += 1
-        out = linear(out, 7, name=str(layer_num) + '_fc')
+        out = linear(out, outputparams, name=str(layer_num) + '_fc')
 
     variables = tf.contrib.framework.get_variables(vs)
     return out, variables

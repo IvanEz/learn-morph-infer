@@ -22,10 +22,10 @@ class Trainer3(Trainer):
 
             self.G_, self.G_var = TumorGenerator(self.geom, self.filters, self.output_shape,
                                                  num_conv=self.num_conv, repeat=self.repeat, arch=self.arch,
+                                                 outputparams=self.outputparams,
                                                  name='tumor', reuse=False)
 
         #self.G = denorm_img3(self.G_) # for debug
-        
 
         show_all_variables()
 
