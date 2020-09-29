@@ -15,7 +15,7 @@ from ops import *
 
 import pickle
 
-normalization_range = [-100, 100]
+normalization_range = [-1, 1]
 
 class BatchManager(object):
     def __init__(self, config):
