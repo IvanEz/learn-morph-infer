@@ -9,6 +9,7 @@ The implementation is adopted from https://github.com/byungsook/deep-fluids
     1. Set outputparams = 6
     2. In inverse_preprocess_single set thrvolume = data['data']
     3. In inverse_preprocess_single start paramsarray[0] from Dw, removing uth
+    4. Adjust paramsarray size in declaration
     
     > more changes needed for test() 
     

@@ -51,8 +51,8 @@ class BatchManager(object):
             # ALWAYS change self.paths / valid.paths, never change num_samples!!
             all_paths = sorted(glob("{}/*/".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
             print(self.root)
-            self.paths = all_paths[:36]
-            self.valid_paths = all_paths[36:48]
+            self.paths = all_paths[:9000]
+            self.valid_paths = all_paths[9000:10000]
 
         self.num_samples = len(self.paths)
         self.num_samples_validation = len(self.valid_paths)
@@ -438,7 +438,8 @@ def inverse_preprocess(file_path, val_path):
 def inverse_preprocess_single(file_path):
     # paths point to directory with files
     with np.load(file_path + "Data_0001.npz") as data:
-        thrvolume = data['thr_data']
+        #thrvolume = data['thr_data']
+        thrvolume = data['data']
         thrvolume_resized = np.delete(np.delete(np.delete(thrvolume, 128, 0), 128, 1), 128, 2) #from 129x129x129 to 128x128x128
         #TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
         thrvolume_resized = np.expand_dims(thrvolume_resized, -1) #now it is 128x128x128x1
@@ -446,15 +447,15 @@ def inverse_preprocess_single(file_path):
     with open(file_path + "parameter_tag.pkl", "rb") as par:
         #TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
         #TODO: rounding to 6 digits?
-        paramsarray = [float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN")]
+        paramsarray = [float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN")]
         params = pickle.load(par)
-        paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], normalization_range) #TODO: change range -> still uses [0.6, 0.8] range!!
-        paramsarray[1] = np.interp(params['Dw'], [0.0002, 0.015], normalization_range)
-        paramsarray[2] = np.interp(params['rho'], [0.002, 0.2], normalization_range)
-        paramsarray[3] = np.interp(params['Tend'], [50, 1500], normalization_range)
-        paramsarray[4] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
-        paramsarray[5] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
-        paramsarray[6] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
+        #paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], normalization_range) #TODO: change range -> still uses [0.6, 0.8] range!!
+        paramsarray[0] = np.interp(params['Dw'], [0.0002, 0.015], normalization_range)
+        paramsarray[1] = np.interp(params['rho'], [0.002, 0.2], normalization_range)
+        paramsarray[2] = np.interp(params['Tend'], [50, 1500], normalization_range)
+        paramsarray[3] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
+        paramsarray[4] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
+        paramsarray[5] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
 
     return thrvolume_resized, paramsarray
 
