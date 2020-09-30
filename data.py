@@ -51,8 +51,8 @@ class BatchManager(object):
             # ALWAYS change self.paths / valid.paths, never change num_samples!!
             all_paths = sorted(glob("{}/*/".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
             print(self.root)
-            self.paths = all_paths[:18000]
-            self.valid_paths = all_paths[18000:20000]
+            self.paths = all_paths[:36]
+            self.valid_paths = all_paths[36:48]
 
         self.num_samples = len(self.paths)
         self.num_samples_validation = len(self.valid_paths)
