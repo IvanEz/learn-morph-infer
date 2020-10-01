@@ -13,18 +13,18 @@ def add_argument_group(name):
 
 # Network
 net_arg = add_argument_group('Network')
-net_arg.add_argument('--is_3d', type=str2bool, default=False)
-net_arg.add_argument('--res_x', type=int, default=96)
-net_arg.add_argument('--res_y', type=int, default=128)
-net_arg.add_argument('--res_z', type=int, default=32)
+net_arg.add_argument('--is_3d', type=str2bool, default=True) #was false
+net_arg.add_argument('--res_x', type=int, default=128) #was 96
+net_arg.add_argument('--res_y', type=int, default=128) #was 128
+net_arg.add_argument('--res_z', type=int, default=128) #was 32
 net_arg.add_argument('--repeat', type=int, default=0)
 net_arg.add_argument('--filters', type=int, default=128)
 net_arg.add_argument('--num_conv', type=int, default=5)
-net_arg.add_argument('--use_curl', type=str2bool, default=True)
+net_arg.add_argument('--use_curl', type=str2bool, default=False) #was true
 net_arg.add_argument('--w1', type=float, default=1.0, help='weight for l1')
 net_arg.add_argument('--w2', type=float, default=10.0, help='weight for jacobian')
 net_arg.add_argument('--w3', type=float, default=0.005, help='weight for discriminator')
-net_arg.add_argument('--arch', type=str, default='de', choices=['de', 'dg', 'ae', 'nn','alternative'],
+net_arg.add_argument('--arch', type=str, default='alternative', choices=['de', 'dg', 'ae', 'nn','alternative'], #was de
                      help='dec, dec+discriminator, auto-encoder, multi-layer perceptron')
 # for AE and NN
 net_arg.add_argument('--z_num', type=int, default=16)
@@ -36,7 +36,7 @@ net_arg.add_argument('--w_size', type=int, default=5)
 
 # Data
 data_arg = add_argument_group('Data')
-data_arg.add_argument('--valid_dataset_dir', type=str, default='../deep_data/data/valid')
+#data_arg.add_argument('--valid_dataset_dir', type=str, default='../deep_data/data/valid')
 data_arg.add_argument('--dataset', type=str, default='')
 data_arg.add_argument('--batch_size', type=int, default=8)
 data_arg.add_argument('--test_batch_size', type=int, default=100)
@@ -46,6 +46,14 @@ data_arg.add_argument('--data_type', type=str, default='velocity')
 #inverse
 inv_arg = add_argument_group('Inverse')
 inv_arg.add_argument('--outputparams', type=int, default=7)
+
+inv_arg.add_argument('--starttraindata', type=int, default=0)
+inv_arg.add_argument('--endtraindata', type=int, default=9000)
+inv_arg.add_argument('--startvaldata', type=int, default=9000)
+inv_arg.add_argument('--endvaldata', type=int, default=10000)
+
+inv_arg.add_argument('--fcsize', type=int, default=64)
+inv_arg.add_argument('--fchdepth', type=int, default=2)
 
 # Training / test parameters
 train_arg = add_argument_group('Training')

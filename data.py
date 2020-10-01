@@ -21,9 +21,13 @@ class BatchManager(object):
     def __init__(self, config):
         self.rng = np.random.RandomState(config.random_seed)
         self.root = config.data_path        
-        self.root_val = config.valid_dataset_dir
+        #self.root_val = config.valid_dataset_dir
         # read data generation arguments
         self.args = {}
+        self.starttraindata = config.starttraindata
+        self.endtraindata = config.endtraindata
+        self.startvaldata = config.startvaldata
+        self.endvaldata = config.endvaldata
         '''
         with open(os.path.join(self.root, 'args.txt'), 'r') as f:
             while True:
@@ -51,8 +55,8 @@ class BatchManager(object):
             # ALWAYS change self.paths / valid.paths, never change num_samples!!
             all_paths = sorted(glob("{}/*/".format(self.root))) #self.root = "/mnt/Drive2/ivan/samples_extended/Dataset"
             print(self.root)
-            self.paths = all_paths[:9000]
-            self.valid_paths = all_paths[9000:10000]
+            self.paths = all_paths[self.starttraindata : self.endtraindata]
+            self.valid_paths = all_paths[self.startvaldata : self.endvaldata]
 
         self.num_samples = len(self.paths)
         self.num_samples_validation = len(self.valid_paths)

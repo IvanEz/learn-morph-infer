@@ -19,3 +19,11 @@ The implementation is adopted from https://github.com/byungsook/deep-fluids
     
     > more changes needed for test()
 
+- Inverse parameters:
+    * Train on data [starttraindata, endtraindata]
+    * Validate on [startvaldata, endvaldata]
+    
+    *Make sure they do not overlap! Otherwise some validation data in training set!*
+    
+    * Number of neurons in hidden layer: fcsize
+    * Number of fully connected *hidden* layers: fchdepth

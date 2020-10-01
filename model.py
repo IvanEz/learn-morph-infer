@@ -3,7 +3,7 @@ import tensorflow as tf
 from ops import *
 
 
-def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputparams, name = 'tumor', reuse=tf.AUTO_REUSE ):
+def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputparams, fcsize, fchdepth, name = 'tumor', reuse=tf.AUTO_REUSE ):
 
     with tf.variable_scope(name, reuse=reuse) as vs:
         if arch == 'alternative':
@@ -99,10 +99,10 @@ def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputpara
                 G_, _ = GeneratorBE3(param_geom, filters, output_shape, reuse=reuse,
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
             elif test_choice == 5:
-                sizeFC = 64
-                G_, _ = EncoderBE3_inverse(geom, filters, sizeFC, 'inverseNN', outputparams,
-                                   num_conv=num_conv - 1, conv_k=3, repeat=repeat,
-                                   act=lrelu, reuse=reuse, alternative_output_shape=True)
+                #sizeFC = 64
+                G_, _ = EncoderBE3_inverse(geom, filters, fcsize, 'inverseNN', outputparams,
+                                   num_conv=num_conv - 1, conv_k=3, fchdepth=fchdepth,
+                                   act=lrelu, reuse=reuse)
                 #num_conv=2
 
 
@@ -381,8 +381,7 @@ def EncoderBE3(x, filters, z_num, name='enc', num_conv=3, conv_k=3, repeat=0, ac
     variables = tf.contrib.framework.get_variables(vs)
     return out, variables
 
-def EncoderBE3_inverse(x, filters, z_num, name='enc', outputparams=7, num_conv=2, conv_k=3, repeat=0, act=lrelu, reuse=False,
-               alternative_output_shape=False, skip_connect=False):
+def EncoderBE3_inverse(x, filters, z_num, name='enc', outputparams=7, num_conv=2, conv_k=3, fchdepth=2, act=lrelu, reuse=False):
     #z_num here: amount of layers in fully connected network (different in original architecture!!)
     #Current state: experimental / first basic architecture
 
@@ -425,14 +424,20 @@ def EncoderBE3_inverse(x, filters, z_num, name='enc', outputparams=7, num_conv=2
                 # x = tf.contrib.layers.max_pool2d(x, [2, 2], [2, 2], padding='VALID')
 
         b = get_conv_shape(x)[0]
-        flat = tf.reshape(x, [b, -1])
+        out = tf.reshape(x, [b, -1])   #flattening!!
 
         # fully connected layer (TODO: batch norm + dropout)
-        out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)  #TODO: too many weights here right now, change arch
-        layer_num += 1
-        out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)
-        layer_num += 1
-        out = linear(out, outputparams, name=str(layer_num) + '_fc')
+        for _ in range(fchdepth):
+            out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)  # TODO: may have too many weights here! Check in summary!
+            layer_num += 1
+
+        out = linear(out, outputparams, name=str(layer_num) + '_fc') #final layer
+
+        #out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)
+        #layer_num += 1
+        #out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)
+        #layer_num += 1
+
 
     variables = tf.contrib.framework.get_variables(vs)
     return out, variables

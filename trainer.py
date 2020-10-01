@@ -46,6 +46,8 @@ class Trainer(object):
         self.val_set_size = batch_manager.num_samples_validation
 
         self.outputparams = config.outputparams
+        self.fcsize = config.fcsize
+        self.fchdepth = config.fchdepth
 
         self.repeat = config.repeat
         self.filters = config.filters
