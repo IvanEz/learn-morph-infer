@@ -451,7 +451,7 @@ def inverse_preprocess_single(file_path):
     with open(file_path + "parameter_tag.pkl", "rb") as par:
         #TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
         #TODO: rounding to 6 digits?
-        paramsarray = [float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN"), float("NaN")]
+        paramsarray = np.zeros(6)
         params = pickle.load(par)
         #paramsarray[0] = np.interp(params['uth'], [0.6, 0.8], normalization_range) #TODO: change range -> still uses [0.6, 0.8] range!!
         paramsarray[0] = np.interp(params['Dw'], [0.0002, 0.015], normalization_range)
