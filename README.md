@@ -16,6 +16,7 @@ The implementation is adopted from https://github.com/byungsook/deep-fluids
 - To remove certain output parameters:
     1. Set outputparams = desired number
     2. In inverse_preprocess_single remove unwanted outputparams
+    3. Adjust paramsarray size in declaration
     
     > more changes needed for test()
 

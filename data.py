@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from ops import *
 
-import pickle
+import pickle5 as pickle
 
 normalization_range = [-1, 1]
 
