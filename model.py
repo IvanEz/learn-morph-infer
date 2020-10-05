@@ -100,7 +100,7 @@ def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputpara
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
             elif test_choice == 5:
                 #sizeFC = 64
-                G_, _ = EncoderBE3_inverse(geom, filters, fcsize, 'inverseNN', outputparams,
+                G_, _ = EncoderBE3_inverse_2(geom, filters, fcsize, 'inverseNN', outputparams,
                                    num_conv=num_conv - 1, conv_k=3, fchdepth=fchdepth,
                                    act=lrelu, reuse=reuse)
                 #num_conv=2
@@ -382,6 +382,67 @@ def EncoderBE3(x, filters, z_num, name='enc', num_conv=3, conv_k=3, repeat=0, ac
     return out, variables
 
 def EncoderBE3_inverse(x, filters, z_num, name='enc', outputparams=7, num_conv=2, conv_k=3, fchdepth=2, act=lrelu, reuse=False):
+    #z_num here: amount of layers in fully connected network (different in original architecture!!)
+    #Current state: experimental / first basic architecture
+
+    with tf.variable_scope(name, reuse=reuse) as vs:
+
+        print("Shape of inverse: " + str(get_conv_shape(x)))
+        x_shape = get_conv_shape(x)[1:]
+
+        #repeat_num = int(np.log2(np.max(x_shape[:-1]))) - 2
+        repeat_num = 5 #repeat_num - 1 times we half the dimension (4 times): 128 -> 64 -> 32 -> 16 -> 8
+        #repeat_num = 5
+        assert (repeat_num > 0 and np.sum([i % np.power(2, repeat_num - 1) for i in x_shape[:-1]]) == 0)
+
+        ch = 1
+        layer_num = 0
+        x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_conv')
+        print("Shape of inverse: " + str(get_conv_shape(x)))
+        x0 = x
+        layer_num += 1
+        for idx in range(repeat_num):
+            for idy in range(num_conv):
+                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
+                print("Shape of inverse: " + str(get_conv_shape(x)))
+                layer_num += 1
+
+            # skip connection
+            #if skip_connect:
+            #    x = tf.concat([x, x0], axis=-1)
+            #    ch += filters
+            #else:
+
+            x += x0
+            ch = 2 * (filters**(idx+1))
+            print('debug.Shape of x: ', get_conv_shape(x))
+            if idx < repeat_num - 1:
+                x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2')
+                layer_num += 1
+                x0 = x
+                print("Shape of inverse: " + str(get_conv_shape(x)))
+                # x = tf.contrib.layers.max_pool2d(x, [2, 2], [2, 2], padding='VALID')
+
+        b = get_conv_shape(x)[0]
+        out = tf.reshape(x, [b, -1])   #flattening!!
+
+        # fully connected layer (TODO: batch norm + dropout)
+        for _ in range(fchdepth):
+            out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)  # TODO: may have too many weights here! Check in summary!
+            layer_num += 1
+
+        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=relu) #final layer
+
+        #out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)
+        #layer_num += 1
+        #out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)
+        #layer_num += 1
+
+
+    variables = tf.contrib.framework.get_variables(vs)
+    return out, variables
+
+def EncoderBE3_inverse_2(x, filters, z_num, name='enc', outputparams=7, num_conv=2, conv_k=3, fchdepth=2, act=lrelu, reuse=False):
     #z_num here: amount of layers in fully connected network (different in original architecture!!)
     #Current state: experimental / first basic architecture
 
