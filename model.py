@@ -100,7 +100,7 @@ def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputpara
                                      num_conv=num_conv, repeat=repeat, alternative_input_shape=False, act= relu)
             elif test_choice == 5:
                 #sizeFC = 64
-                G_, _ = EncoderBE3_inverse_2(geom, filters, fcsize, 'inverseNN', outputparams,
+                G_, _ = EncoderBE3_inverse(geom, filters, fcsize, 'inverseNN', outputparams,
                                    num_conv=num_conv - 1, conv_k=3, fchdepth=fchdepth,
                                    act=lrelu, reuse=reuse)
                 #num_conv=2
