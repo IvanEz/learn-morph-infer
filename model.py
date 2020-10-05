@@ -477,7 +477,7 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
             #else:
 
             #x += x0
-            ch = 2 * (filters**(idx+1))
+            ch = 4 * (filters**(idx+1))
             print('debug.Shape of x: ', get_conv_shape(x))
             if idx < repeat_num - 1:
                 x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2')
@@ -494,7 +494,7 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
             out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)  # TODO: may have too many weights here! Check in summary!
             layer_num += 1
 
-        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=relu) #final layer
+        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=tf.math.tanh) #final layer
 
         #out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)
         #layer_num += 1
