@@ -23,6 +23,7 @@ The implementation is adopted from https://github.com/byungsook/deep-fluids
 - Inverse parameters:
     * Train on data [starttraindata, endtraindata]
     * Validate on [startvaldata, endvaldata]
+    * Never use range [90000,100000] (test data!) 
     
     *Make sure they do not overlap! Otherwise some validation data in training set!*
     
