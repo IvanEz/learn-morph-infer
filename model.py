@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from ops import *
-
+from tensorflow.contrib.layers.python.layers import initializers
 
 def TumorGenerator(geom,filters,output_shape, num_conv , repeat,arch, outputparams, fcsize, fchdepth, name = 'tumor', reuse=tf.AUTO_REUSE ):
 
@@ -447,7 +447,6 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
     #Current state: experimental / first basic architecture
 
     with tf.variable_scope(name, reuse=reuse) as vs:
-
         print("Shape of inverse: " + str(get_conv_shape(x)))
         x_shape = get_conv_shape(x)[1:]
 
@@ -465,9 +464,11 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
         for idx in range(repeat_num):
             for idy in range(num_conv // 2):
                 x_prime = x
-                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
+                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1',
+                           weights_initializer=initializers.variance_scaling_initializer())
                 layer_num += 1
-                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
+                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1',
+                           weights_initializer=initializers.variance_scaling_initializer())
                 layer_num += 1
                 #x = x_prime + x
                 #x = relu(x)
@@ -486,7 +487,8 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
             ch = filters**(idx+1)
             print('debug.Shape of x: ', get_conv_shape(x))
             if idx < repeat_num - 1:
-                x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2')
+                x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2',
+                           weights_initializer=initializers.variance_scaling_initializer())
                 layer_num += 1
                 #x0 = x
                 print("Shape of inverse: " + str(get_conv_shape(x)))
@@ -497,10 +499,12 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
 
         # fully connected layer (TODO: batch norm + dropout)
         for _ in range(fchdepth):
-            out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)  # TODO: may have too many weights here! Check in summary!
+            out = linear(out, z_num, name=str(layer_num) + '_fc', act=act,
+                         weights_initializer=initializers.variance_scaling_initializer())  # TODO: may have too many weights here! Check in summary!
             layer_num += 1
 
-        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=relu) #final layer
+        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=relu,
+                     weights_initializer=initializers.variance_scaling_initializer()) #final layer
 
         #out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)
         #layer_num += 1

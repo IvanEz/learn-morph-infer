@@ -5,6 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import numpy as np
+from tensorflow.contrib.layers.python.layers import initializers
 
 def relu(x):
     return tf.maximum(x, 0)
@@ -15,16 +16,17 @@ def lrelu(x, leak=0.2):
 def conv2d(x, o_dim, data_format='NHWC', name=None, k=4, s=2, act=None):
     return slim.conv2d(x, o_dim, k, stride=s, activation_fn=act, scope=name, data_format=data_format)
 
-def conv3d(x, o_dim, data_format='NDHWC', name=None, k=4, s=2, act=None):
-    return slim.conv3d(x, o_dim, k, stride=s, activation_fn=act, scope=name, data_format=data_format)
+def conv3d(x, o_dim, data_format='NDHWC', name=None, k=4, s=2, act=None,
+           weights_initializer=initializers.xavier_initializer()):
+    return slim.conv3d(x, o_dim, k, stride=s, activation_fn=act, scope=name, data_format=data_format, weights_initializer=weights_initializer)
     # return tf.layers.conv3d(x, o_dim, k, (s,s,s), 'SAME', activation=act, name=name,
     #                         kernel_initializer=tf.contrib.layers.xavier_initializer())
 
 def deconv2d(x, o_dim, data_format='NHWC', name=None, k=4, s=2, act=None):
     return slim.conv2d_transpose(x, o_dim, k, stride=s, activation_fn=act, scope=name, data_format=data_format)
 
-def linear(x, o_dim, name=None, act=None):
-    return slim.fully_connected(x, o_dim, activation_fn=act, scope=name)
+def linear(x, o_dim, name=None, act=None, weights_initializer=initializers.xavier_initializer()):
+    return slim.fully_connected(x, o_dim, activation_fn=act, scope=name, weights_initializer=weights_initializer)
 
 def batch_norm(x, train, data_format='NHWC', name=None, act=lrelu, epsilon=1e-5, momentum=0.9):
     return slim.batch_norm(x,
