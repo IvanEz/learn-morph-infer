@@ -463,12 +463,18 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
         #x0 = x
         #layer_num += 1
         for idx in range(repeat_num):
-            for idy in range(num_conv):
-                x_prime = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
-                x = x_prime + x
+            for idy in range(num_conv // 2):
+                x_prime = x
+                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
+                layer_num += 1
+                x = conv3d(x, ch, k=conv_k, s=1, act=act, name=str(layer_num) + '_' + str(idx) + '_' + str(idy) +'_conv_s1')
+                layer_num += 1
+                #x = x_prime + x
+                #x = relu(x)
+                x += x_prime
                 x = relu(x)
                 print("Shape of inverse: " + str(get_conv_shape(x)))
-                layer_num += 1
+                print("Shape of inverse: " + str(get_conv_shape(x)))
 
             # skip connection
             #if skip_connect:
@@ -477,7 +483,7 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
             #else:
 
             #x += x0
-            ch = 4 * (filters**(idx+1))
+            ch = filters**(idx+1)
             print('debug.Shape of x: ', get_conv_shape(x))
             if idx < repeat_num - 1:
                 x = conv3d(x, ch, k=conv_k, s=2, act=act, name=str(layer_num) + '_' + str(idx) + '_conv_s2')
@@ -494,7 +500,7 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
             out = linear(out, z_num, name=str(layer_num) + '_fc', act=act)  # TODO: may have too many weights here! Check in summary!
             layer_num += 1
 
-        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=tf.math.tanh) #final layer
+        out = linear(out, outputparams, name=str(layer_num) + '_fc', act=relu) #final layer
 
         #out = linear(flat, z_num, name=str(layer_num) + '_fc', act=act)
         #layer_num += 1
