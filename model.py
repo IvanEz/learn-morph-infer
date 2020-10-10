@@ -451,7 +451,7 @@ def EncoderBE3_inverse3(x, filters, z_num, name='enc', outputparams=7, num_conv=
         x_shape = get_conv_shape(x)[1:]
 
         #repeat_num = int(np.log2(np.max(x_shape[:-1]))) - 2
-        repeat_num = 5 #repeat_num - 1 times we half the dimension (4 times): 128 -> 64 -> 32 -> 16 -> 8
+        repeat_num = 6 #repeat_num - 1 times we half the dimension (4 times): 128 -> 64 -> 32 -> 16 -> 8
         #repeat_num = 5
         assert (repeat_num > 0 and np.sum([i % np.power(2, repeat_num - 1) for i in x_shape[:-1]]) == 0)
 
