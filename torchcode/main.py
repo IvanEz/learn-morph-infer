@@ -11,7 +11,7 @@ from torchvision import datasets
 from torchvision import transforms
 from mycode import *
 
-from torchsummary import summary
+from torchsummary import summary_string
 from torch.utils.tensorboard import SummaryWriter
 import os
 from datetime import datetime
@@ -26,6 +26,12 @@ os.environ["CUDA_VISIBLE_DEVICES"]="6"
 ### SETTINGS
 ##########################
 
+is_new_save = True
+loaddir = "/mnt/Drive2/ivan_kevin/log/torchimpl/TO_CHOOSE"
+
+if not is_new_save:
+    checkpoint = load_inverse_model(loaddir)
+
 # Experiment specification
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
@@ -39,30 +45,39 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #random_seed = 123
 learning_rate = 0.00001
 num_epochs = 300
-batch_size = 256
+batch_size = 256 if is_new_save else checkpoint['batch_size']
 num_workers = 16
+dropoutrate = 0.2 if is_new_save else checkpoint['dropoutrate']
 
 # Architecture
-numoutputs = 3
+numoutputs = 3 if is_new_save else checkpoint['numoutputs']
 
-train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", 0, 6400)
+
+starttrain = 0
+endtrain = 6400
+startval = 6400
+endval = 7040
+train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", starttrain, endtrain)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", 6400, 7040)
+val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", startval, endval)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 
 # Setting up model
-writer = SummaryWriter(log_dir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose)
+savelogdir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose
+writer = SummaryWriter(log_dir = savelogdir)
 
 #torch.manual_seed(random_seed)
-model = ConvNet(numoutputs=numoutputs)
-print(model)
+model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
+summarystring = repr(model)
+print(summarystring)
 model = model.to(device)
-summary(model, (1,128,128,128), device=device)
 
+additionalsummary, _ = summary_string(model, (1,128,128,128), device=device)
+print(additionalsummary)
 
 #model = model.to(device)
 
@@ -72,56 +87,84 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 step = 0 #1 step = 1 pass through 1 batch
 step_val = 0
 
-for epoch in range(num_epochs):
-    #training
-    running_training_loss = 0.0
-    model = model.train()
-    for batch_idx, (x,y) in enumerate(train_generator):
-        #x: volume
-        #y: parameters
-        x, y = x.to(device), y.to(device)
+best_val_loss = 999999.0
 
-        y_predicted = model(x)
-        cost = F.l1_loss(y_predicted, y)
-        optimizer.zero_grad()
-
-        cost.backward()
-
-        optimizer.step()
-
-
-        running_training_loss += cost
-        writer.add_scalar('Loss/train', cost, step)
-        if not batch_idx % 2:
-            print ('Epoch: %03d/%03d | Batch %03d/%03d | Cost: %.6f' 
-                   %(epoch+1, num_epochs, batch_idx + 1, 
-                     len(train_generator), cost))
-        step += 1
-            
-
-
-    total_train_loss = (running_training_loss / len(train_generator)).item() #avg loss in epoch!
-    print('Epoch: %03d | Average loss: %.6f'%(epoch+1, total_train_loss))
-    writer.add_scalar('Loss/avg_train', total_train_loss, epoch)
-
-    #validation
-    running_validation_loss = 0.0
-    model = model.eval()
-    with torch.set_grad_enabled(False):
-        for batch_idy, (x,y) in enumerate(val_generator):
+if is_new_save:
+    for epoch in range(num_epochs):
+        #training
+        running_training_loss = 0.0
+        model = model.train()
+        for batch_idx, (x,y) in enumerate(train_generator):
+            #x: volume
+            #y: parameters
             x, y = x.to(device), y.to(device)
+
             y_predicted = model(x)
             cost = F.l1_loss(y_predicted, y)
-            
-            running_validation_loss += cost
-            writer.add_scalar('Loss/val', cost, step_val)
-            if not batch_idy % 2:
-                print ('Validating: %03d | Batch %03d/%03d | Cost: %.4f' 
-                   %(epoch+1, batch_idy + 1, len(val_generator), cost))
-            step_val += 1
-    
-    total_val_loss = (running_validation_loss / len(val_generator)).item()
-    print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
-    writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
-        
-writer.close()     
+            optimizer.zero_grad()
+
+            cost.backward()
+
+            optimizer.step()
+
+
+            running_training_loss += cost
+            writer.add_scalar('Loss/train', cost, step)
+            if not batch_idx % 2:
+                print ('Epoch: %03d/%03d | Batch %03d/%03d | Cost: %.6f'
+                       %(epoch+1, num_epochs, batch_idx + 1,
+                         len(train_generator), cost))
+            step += 1
+
+
+
+        total_train_loss = (running_training_loss / len(train_generator)).item() #avg loss in epoch!
+        print('Epoch: %03d | Average loss: %.6f'%(epoch+1, total_train_loss))
+        writer.add_scalar('Loss/avg_train', total_train_loss, epoch)
+
+        #validation
+        running_validation_loss = 0.0
+        model = model.eval()
+        with torch.set_grad_enabled(False):
+            for batch_idy, (x,y) in enumerate(val_generator):
+                x, y = x.to(device), y.to(device)
+                y_predicted = model(x)
+                cost = F.l1_loss(y_predicted, y)
+
+                running_validation_loss += cost
+                writer.add_scalar('Loss/val', cost, step_val)
+                if not batch_idy % 2:
+                    print ('Validating: %03d | Batch %03d/%03d | Cost: %.4f'
+                       %(epoch+1, batch_idy + 1, len(val_generator), cost))
+                step_val += 1
+
+        total_val_loss = (running_validation_loss / len(val_generator)).item()
+        print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
+        writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
+
+        if total_val_loss < best_val_loss:
+            best_val_loss = total_val_loss
+            now = time.time()
+            save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
+                                total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
+                               summarystring, additionalsummary)
+            savetime = time.time() - now
+            print(">>> Saving new model with new best val loss " + str(best_val_loss) + " in " + str(savetime) + "s.")
+
+    print("Best val loss: %.6f"%(best_val_loss))
+
+else:
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+    model = model.eval()
+    with torch.set_grad_enabled(False):
+        for batch_idy, (x, y) in enumerate(val_generator):
+            x, y = x.to(device), y.to(device)
+            y_predicted = model(x)
+            cost = F.l1_loss(y_predicted, y, reduction='none')
+
+            print(cost.shape)
+
+
+writer.close()

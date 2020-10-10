@@ -63,7 +63,7 @@ def conv1x1(in_planes, out_planes, stride=1, padding=0):
 
 class ConvNet(torch.nn.Module):
 
-    def __init__(self, numoutputs):
+    def __init__(self, numoutputs, dropoutrate=0.2):
         super(ConvNet, self).__init__()
 
         self.seq = torch.nn.Sequential(
@@ -103,9 +103,22 @@ class ConvNet(torch.nn.Module):
                     torch.nn.BatchNorm3d(32),
                     #-------still 8----------                           
                     torch.nn.Flatten(),
-                    torch.nn.Dropout(p=0.2),
-                    torch.nn.Linear(8*8*8*32, 3)
+                    torch.nn.Dropout(p=dropoutrate),
+                    torch.nn.Linear(8*8*8*32, numoutputs)
                     )
 
     def forward(self, x):
         return self.seq(x)
+
+
+def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
+                       dropoutrate, batch_size, numoutputs, learning_rate,
+                       summarystring, additionalsummary):
+    torch.save({'epoch': epoch, 'model_state_dict': model_state_dict, 'optimizer_state_dict': optimizer_state_dict,
+                'best_val_loss': best_val_loss, 'total_train_loss': total_train_loss, 'dropoutrate': dropoutrate,
+                'batch_size': batch_size, 'numoutputs': numoutputs, 'learning_rate': learning_rate,
+                'summarystring': summarystring, 'additionalsummary': additionalsummary},
+               savelogdir + '/bestval-model.pt')
+
+def load_inverse_model(loaddir):
+    return torch.load(loaddir)
