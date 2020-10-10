@@ -27,10 +27,10 @@ os.environ["CUDA_VISIBLE_DEVICES"]="6"
 ##########################
 
 is_new_save = True
-loaddir = "/mnt/Drive2/ivan_kevin/log/torchimpl/TO_CHOOSE"
+loaddir = "/mnt/Drive2/ivan_kevin/log/torchimpl/1010-19-55-32-debug" #choose directory from which to load from if is_new_save = False, do not end with '/'
 
 if not is_new_save:
-    checkpoint = load_inverse_model(loaddir)
+    checkpoint = load_inverse_model(loaddir + "/bestval-model.pt")
 
 # Experiment specification
 currenttime = datetime.now()
@@ -74,9 +74,8 @@ writer = SummaryWriter(log_dir = savelogdir)
 model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
 summarystring = repr(model)
 print(summarystring)
-model = model.to(device)
 
-additionalsummary, _ = summary_string(model, (1,128,128,128), device=device)
+additionalsummary, _ = summary_string(model, (1,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 print(additionalsummary)
 
 #model = model.to(device)
@@ -90,6 +89,7 @@ step_val = 0
 best_val_loss = 999999.0
 
 if is_new_save:
+    model = model.to(device)
     for epoch in range(num_epochs):
         #training
         running_training_loss = 0.0
@@ -157,14 +157,32 @@ else:
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
+    model = model.to(device)
+
     model = model.eval()
+
+    lossmatrix = []
     with torch.set_grad_enabled(False):
         for batch_idy, (x, y) in enumerate(val_generator):
             x, y = x.to(device), y.to(device)
             y_predicted = model(x)
             cost = F.l1_loss(y_predicted, y, reduction='none')
+            cost = cost.cpu().numpy()
+            print(cost)
+            assert cost.shape[1] == numoutputs
+            lossmatrix.append(cost)
 
-            print(cost.shape)
+        lossmatrix = np.concatenate(lossmatrix)
+
+        print("##########################################")
+        for outputfeature in range(numoutputs):
+            losses = lossmatrix[:, outputfeature]
+            mean = np.mean(losses)
+            std = np.std(losses)
+
+            print("Output " + str(outputfeature) + " error: mean = " + str(np.round(mean, 4)) + ", std = " + str(np.round(std, 4)))
+        print("##########################################")
+
 
 
 writer.close()
