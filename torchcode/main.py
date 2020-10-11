@@ -183,5 +183,6 @@ else:
             std = np.std(losses)
 
             print("Output " + str(outputfeature) + " error: mean = " + str(np.round(mean, 4)) + ", std = " + str(np.round(std, 4)))
+            print("Error based on normalization range [-1.0, 1.0]! If error output here is e.g. 0.05 --> error is 2.5% !")
         print("##########################################")
 
