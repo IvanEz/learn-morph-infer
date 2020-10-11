@@ -67,8 +67,9 @@ val_generator = torch.utils.data.DataLoader(val_dataset,
 
 
 # Setting up model
-savelogdir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose
-writer = SummaryWriter(log_dir = savelogdir)
+if is_new_save:
+    savelogdir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose
+    writer = SummaryWriter(log_dir = savelogdir)
 
 #torch.manual_seed(random_seed)
 model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
@@ -78,10 +79,16 @@ print(summarystring)
 additionalsummary, _ = summary_string(model, (1,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 print(additionalsummary)
 
-#model = model.to(device)
+##########################################
+if not is_new_save:
+    model.load_state_dict(checkpoint['model_state_dict'])
+model = model.to(device)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+if not is_new_save:
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+###########################################
 # Training
 step = 0 #1 step = 1 pass through 1 batch
 step_val = 0
@@ -89,7 +96,6 @@ step_val = 0
 best_val_loss = 999999.0
 
 if is_new_save:
-    model = model.to(device)
     for epoch in range(num_epochs):
         #training
         running_training_loss = 0.0
@@ -142,7 +148,7 @@ if is_new_save:
         print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
         writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
 
-        if total_val_loss < best_val_loss:
+        if total_val_loss < best_val_loss: #TODO: also save every x epochs --> might decrease slowly but still overfit
             best_val_loss = total_val_loss
             now = time.time()
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
@@ -152,13 +158,9 @@ if is_new_save:
             print(">>> Saving new model with new best val loss " + str(best_val_loss) + " in " + str(savetime) + "s.")
 
     print("Best val loss: %.6f"%(best_val_loss))
+    writer.close()
 
 else:
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-
-    model = model.to(device)
-
     model = model.eval()
 
     lossmatrix = []
@@ -168,7 +170,7 @@ else:
             y_predicted = model(x)
             cost = F.l1_loss(y_predicted, y, reduction='none')
             cost = cost.cpu().numpy()
-            print(cost)
+            #print(cost)
             assert cost.shape[1] == numoutputs
             lossmatrix.append(cost)
 
@@ -183,6 +185,3 @@ else:
             print("Output " + str(outputfeature) + " error: mean = " + str(np.round(mean, 4)) + ", std = " + str(np.round(std, 4)))
         print("##########################################")
 
-
-
-writer.close()
