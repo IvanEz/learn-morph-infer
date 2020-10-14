@@ -12,6 +12,7 @@ from torchvision import transforms
 from mycode import *
 
 from torchsummary import summary_string
+from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
 import os
 from datetime import datetime
@@ -35,7 +36,7 @@ if not is_new_save:
 # Experiment specification
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
-purpose = "sequential-xyz-6400samples-dropout20"
+purpose = "RESNET-xyz-6400samples-dropout20"
 
 
 # Device
@@ -43,7 +44,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
 #random_seed = 123
-learning_rate = 0.00001
+learning_rate = 0.001 #0.00001 was good
 num_epochs = 300
 batch_size = 256 if is_new_save else checkpoint['batch_size']
 num_workers = 16
@@ -63,22 +64,28 @@ train_generator = torch.utils.data.DataLoader(train_dataset,
 
 val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", startval, endval)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
-                    batch_size=batch_size, shuffle=True, num_workers=num_workers)
+                    batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
 
 # Setting up model
 if is_new_save:
     savelogdir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose
     writer = SummaryWriter(log_dir = savelogdir)
+    writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
 model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
+
+##### summaries #####
 summarystring = repr(model)
 print(summarystring)
 
 additionalsummary, _ = summary_string(model, (1,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 print(additionalsummary)
 
+if is_new_save:
+    writer.add_graph(model, Variable(torch.rand(1,1,128,128,128)))
+##### summaries #####
 ##########################################
 if not is_new_save:
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -116,6 +123,7 @@ if is_new_save:
 
             running_training_loss += cost
             writer.add_scalar('Loss/train', cost, step)
+            writer.add_scalar('losses', cost, step)
             if not batch_idx % 2:
                 print ('Epoch: %03d/%03d | Batch %03d/%03d | Cost: %.6f'
                        %(epoch+1, num_epochs, batch_idx + 1,
@@ -139,6 +147,7 @@ if is_new_save:
 
                 running_validation_loss += cost
                 writer.add_scalar('Loss/val', cost, step_val)
+                writerval.add_scalar('losses', cost, step_val)
                 if not batch_idy % 2:
                     print ('Validating: %03d | Batch %03d/%03d | Cost: %.4f'
                        %(epoch+1, batch_idy + 1, len(val_generator), cost))
@@ -148,17 +157,16 @@ if is_new_save:
         print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
         writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
 
-        if total_val_loss < best_val_loss: #TODO: also save every x epochs --> might decrease slowly but still overfit
+        if np.round(total_val_loss,2) < np.round(best_val_loss,2): #TODO: also save every x epochs --> might decrease slowly but still overfit
             best_val_loss = total_val_loss
-            now = time.time()
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                summarystring, additionalsummary)
-            savetime = time.time() - now
-            print(">>> Saving new model with new best val loss " + str(best_val_loss) + " in " + str(savetime) + "s.")
+            print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()
+    writerval.close()
 
 else:
     model = model.eval()
