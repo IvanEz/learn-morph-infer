@@ -56,10 +56,10 @@ class Dataset(torch.utils.data.Dataset):
 
 
 def conv3x3(in_planes, out_planes, stride=1, padding=1):
-    return torch.nn.Conv3d(in_planes, out_planes, kernel_size=3, stride=stride, padding=padding)
+    return torch.nn.Conv3d(in_planes, out_planes, kernel_size=3, stride=stride, padding=padding, bias=False)
 
 def conv1x1(in_planes, out_planes, stride=1, padding=0):
-    return torch.nn.Conv3d(in_planes, out_planes, kernel_size=1, stride=stride, padding=padding)
+    return torch.nn.Conv3d(in_planes, out_planes, kernel_size=1, stride=stride, padding=padding, bias=False)
 
 class ConvNet(torch.nn.Module):
 
@@ -112,7 +112,7 @@ class ConvNet(torch.nn.Module):
 
 #adapted from https://pytorch.org/docs/0.4.0/_modules/torchvision/models/resnet.html and https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 class BasicBlockInv(torch.nn.Module):
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, inplanes, planes, stride=1, downsample=False):
         super(BasicBlockInv, self).__init__()
 
         norm_layer = torch.nn.BatchNorm3d
@@ -121,8 +121,12 @@ class BasicBlockInv(torch.nn.Module):
         self.relu = torch.nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes,planes)
         self.bn2 = norm_layer(planes)
+        self.relu2 = torch.nn.ReLU(inplace=True)
         self.stride = stride
         self.downsample = downsample
+        if self.downsample:
+            self.conv3 = conv1x1(inplanes, planes, stride)
+            self.bn3 = torch.nn.BatchNorm3d(planes)
 
     def forward(self,x):
         identity = x
@@ -134,11 +138,12 @@ class BasicBlockInv(torch.nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
 
-        if self.downsample is not None:
-            identity = self.downsample(x)
+        if self.downsample is True:
+            identity = self.conv3(identity)
+            identity = self.bn3(identity)
 
         out += identity
-        out = self.relu(out)
+        out = self.relu2(out)
 
         return out
 
@@ -166,12 +171,9 @@ class ResNetInv(torch.nn.Module):
                 torch.nn.init.constant_(m.bias, 0)
 
     def _make_layer(self, block, planes, blocks, stride):
-        downsample = None
+        downsample = False
         if stride != 1 or self.inplanes != planes:
-            downsample = torch.nn.Sequential(
-                conv1x1(self.inplanes, planes, stride),
-                torch.nn.BatchNorm3d(planes)
-            )
+            downsample = True
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
@@ -187,7 +189,7 @@ class ResNetInv(torch.nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
-        x = torch.flatten(x)
+        x = torch.flatten(x,1)
         x = self.do(x)
         x = self.fc(x)
 
@@ -245,7 +247,7 @@ class ResNetInv2(torch.nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
-        x = torch.flatten(x)
+        x = torch.flatten(x, 1)
         x = self.fc(x)
         x = self.relu(x)
         x = self.do(x)
