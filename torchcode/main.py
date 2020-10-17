@@ -36,7 +36,7 @@ if not is_new_save:
 # Experiment specification
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
-purpose = "RESNET-xyz-6400samples-dropout20"
+purpose = "RESNET-debug"
 
 
 # Device
@@ -46,18 +46,18 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #random_seed = 123
 learning_rate = 0.001 #0.00001 was good
 num_epochs = 300
-batch_size = 256 if is_new_save else checkpoint['batch_size']
-num_workers = 16
-dropoutrate = 0.2 if is_new_save else checkpoint['dropoutrate']
+batch_size = 128 if is_new_save else checkpoint['batch_size']
+num_workers = 32
+dropoutrate = 0.4 if is_new_save else checkpoint['dropoutrate']
 
 # Architecture
 numoutputs = 3 if is_new_save else checkpoint['numoutputs']
 
 
 starttrain = 0
-endtrain = 6400
-startval = 6400
-endval = 7040
+endtrain = 4600
+startval = 4600
+endval = 5112
 train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", starttrain, endtrain)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
@@ -74,7 +74,7 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
+model = ResNetInvBasic(numoutputs=numoutputs, dropoutrate=dropoutrate)
 
 ##### summaries #####
 summarystring = repr(model)
@@ -91,7 +91,7 @@ if not is_new_save:
     model.load_state_dict(checkpoint['model_state_dict'])
 model = model.to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) #eps=0.1 works too, prefer lrdecay
 
 if not is_new_save:
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -102,6 +102,10 @@ step_val = 0
 
 best_val_loss = 999999.0
 
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.97)
+
+lossfunction = F.l1_loss
+
 if is_new_save:
     for epoch in range(num_epochs):
         #training
@@ -110,31 +114,35 @@ if is_new_save:
         for batch_idx, (x,y) in enumerate(train_generator):
             #x: volume
             #y: parameters
+            optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
 
             y_predicted = model(x)
-            cost = F.l1_loss(y_predicted, y)
-            optimizer.zero_grad()
+            cost = lossfunction(y_predicted, y)
 
             cost.backward()
 
             optimizer.step()
 
+            beforeitem = time.time()
+            costval = cost.item()
+            elapsedtimeforitem = time.time() - beforeitem
 
-            running_training_loss += cost
-            writer.add_scalar('Loss/train', cost, step)
-            writer.add_scalar('losses', cost, step)
+            print("Time to call item(): " + str(elapsedtimeforitem))
+            running_training_loss += costval
+            writer.add_scalar('Loss/train', costval, step)
             if not batch_idx % 2:
                 print ('Epoch: %03d/%03d | Batch %03d/%03d | Cost: %.6f'
                        %(epoch+1, num_epochs, batch_idx + 1,
-                         len(train_generator), cost))
+                         len(train_generator), costval))
             step += 1
 
 
 
-        total_train_loss = (running_training_loss / len(train_generator)).item() #avg loss in epoch!
+        total_train_loss = (running_training_loss / len(train_generator)) #avg loss in epoch!
         print('Epoch: %03d | Average loss: %.6f'%(epoch+1, total_train_loss))
         writer.add_scalar('Loss/avg_train', total_train_loss, epoch)
+        writer.add_scalar('losses', total_train_loss, epoch)
 
         #validation
         running_validation_loss = 0.0
@@ -143,26 +151,32 @@ if is_new_save:
             for batch_idy, (x,y) in enumerate(val_generator):
                 x, y = x.to(device), y.to(device)
                 y_predicted = model(x)
-                cost = F.l1_loss(y_predicted, y)
+                cost = lossfunction(y_predicted, y)
+                costval = cost.item()
 
-                running_validation_loss += cost
-                writer.add_scalar('Loss/val', cost, step_val)
-                writerval.add_scalar('losses', cost, step_val)
+                running_validation_loss += costval
+                writer.add_scalar('Loss/val', costval, step_val)
                 if not batch_idy % 2:
                     print ('Validating: %03d | Batch %03d/%03d | Cost: %.4f'
-                       %(epoch+1, batch_idy + 1, len(val_generator), cost))
+                       %(epoch+1, batch_idy + 1, len(val_generator), costval))
                 step_val += 1
 
-        total_val_loss = (running_validation_loss / len(val_generator)).item()
+        total_val_loss = (running_validation_loss / len(val_generator))
         print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
         writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
+        writerval.add_scalar('losses', total_val_loss, epoch)
 
         if np.round(total_val_loss,2) < np.round(best_val_loss,2): #TODO: also save every x epochs --> might decrease slowly but still overfit
             best_val_loss = total_val_loss
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                summarystring, additionalsummary)
-            print(">>> Saving new model with new best val loss " + str(best_val_loss))
+            print(">>> Saving model with best val loss " + str(best_val_loss))
+
+        scheduler.step()
+        lastlr = scheduler.get_last_lr()[0]
+        print(lastlr)
+        writer.add_scalar('lr', lastlr, epoch)
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()
@@ -176,7 +190,7 @@ else:
         for batch_idy, (x, y) in enumerate(val_generator):
             x, y = x.to(device), y.to(device)
             y_predicted = model(x)
-            cost = F.l1_loss(y_predicted, y, reduction='none')
+            cost = lossfunction(y_predicted, y, reduction='none')
             cost = cost.cpu().numpy()
             #print(cost)
             assert cost.shape[1] == numoutputs
