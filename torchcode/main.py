@@ -127,7 +127,6 @@ if is_new_save:
 
             running_training_loss += cost
             writer.add_scalar('Loss/train', cost, step)
-            writer.add_scalar('losses', cost, step)
             if not batch_idx % 2:
                 print ('Epoch: %03d/%03d | Batch %03d/%03d | Cost: %.6f'
                        %(epoch+1, num_epochs, batch_idx + 1,
@@ -139,6 +138,7 @@ if is_new_save:
         total_train_loss = (running_training_loss / len(train_generator)).item() #avg loss in epoch!
         print('Epoch: %03d | Average loss: %.6f'%(epoch+1, total_train_loss))
         writer.add_scalar('Loss/avg_train', total_train_loss, epoch)
+        writer.add_scalar('losses', total_train_loss, epoch)
 
         #validation
         running_validation_loss = 0.0
@@ -152,7 +152,6 @@ if is_new_save:
 
                 running_validation_loss += cost
                 writer.add_scalar('Loss/val', cost, step_val)
-                writerval.add_scalar('losses', cost, step_val)
                 if not batch_idy % 2:
                     print ('Validating: %03d | Batch %03d/%03d | Cost: %.4f'
                        %(epoch+1, batch_idy + 1, len(val_generator), cost))
@@ -161,6 +160,7 @@ if is_new_save:
         total_val_loss = (running_validation_loss / len(val_generator)).item()
         print('Epoch: %03d | Validation loss: %.6f'%(epoch+1, total_val_loss))
         writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
+        writerval.add_scalar('losses', total_val_loss, epoch)
 
         if np.round(total_val_loss,2) < np.round(best_val_loss,2): #TODO: also save every x epochs --> might decrease slowly but still overfit
             best_val_loss = total_val_loss
@@ -170,7 +170,8 @@ if is_new_save:
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
         scheduler.step()
-        print(scheduler.get_last_lr())
+        #print(scheduler.get_last_lr())
+        writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()
