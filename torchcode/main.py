@@ -44,7 +44,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
 #random_seed = 123
-learning_rate = 0.0001 #0.00001 was good
+learning_rate = 0.00001 #0.0001 was good
 num_epochs = 5000
 batch_size = 1 if is_new_save else checkpoint['batch_size']
 num_workers = 1
@@ -103,7 +103,7 @@ step_val = 0
 
 best_val_loss = 999999.0
 
-#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.95)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.95)
 #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.99)
 
 if is_new_save:
@@ -118,8 +118,8 @@ if is_new_save:
             x, y = x.to(device), y.to(device)
 
             y_predicted = model(x)
-            #cost = F.l1_loss(y_predicted, y)
-            cost = F.mse_loss(y_predicted, y)
+            cost = F.l1_loss(y_predicted, y)
+            #cost = F.mse_loss(y_predicted, y)
             cost.backward()
 
             optimizer.step()
@@ -147,8 +147,8 @@ if is_new_save:
             for batch_idy, (x,y) in enumerate(val_generator):
                 x, y = x.to(device), y.to(device)
                 y_predicted = model(x)
-                #cost = F.l1_loss(y_predicted, y)
-                cost = F.mse_loss(y_predicted, y)
+                cost = F.l1_loss(y_predicted, y)
+                #cost = F.mse_loss(y_predicted, y)
 
                 running_validation_loss += cost
                 writer.add_scalar('Loss/val', cost, step_val)
@@ -169,8 +169,8 @@ if is_new_save:
                                summarystring, additionalsummary)
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
-        #scheduler.step()
-        #print(scheduler.get_last_lr())
+        scheduler.step()
+        print(scheduler.get_last_lr())
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()
