@@ -30,8 +30,8 @@ class Dataset(torch.utils.data.Dataset):
         file_path = self.all_paths[index]
         #print("got pos " + str(index) + " which corresponds to " + str(file_path))
         with np.load(file_path + "Data_0001.npz") as data:
-            thrvolume = data['thr_data']
-            #thrvolume = data['data']
+            #thrvolume = data['thr_data']
+            thrvolume = data['data']
             thrvolume_resized = np.delete(np.delete(np.delete(thrvolume, 128, 0), 128, 1), 128, 2) #from 129x129x129 to 128x128x128
             #TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
             thrvolume_resized = np.expand_dims(thrvolume_resized, -1) #now it is 128x128x128x1
@@ -118,10 +118,10 @@ class BasicBlockInv(torch.nn.Module):
         norm_layer = torch.nn.BatchNorm3d
         self.conv1 = conv3x3(inplanes, planes, stride=stride)
         self.bn1 = norm_layer(planes)
-        self.relu = torch.nn.ReLU()
+        self.relu = torch.nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes,planes)
         self.bn2 = norm_layer(planes)
-        self.relu2 = torch.nn.ReLU()
+        self.relu2 = torch.nn.ReLU(inplace=True)
         self.stride = stride
         self.downsample = downsample
         if self.downsample:
@@ -161,12 +161,11 @@ class ResNetInv(torch.nn.Module):
         self.layer5 = self._make_layer(block, 32, layers[4], stride=2)
         self.do = torch.nn.Dropout(p=dropoutrate)
         self.fc = torch.nn.Linear(8*8*8*32, numoutputs)
-        self.tanh = torch.nn.Tanh()
 
-        #TODO: check diff with fan_out and fan_in
+        #TODO: try 'fan_out' init
         for m in self.modules():
             if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
             elif isinstance(m, torch.nn.BatchNorm3d):
                 torch.nn.init.constant_(m.weight,1)
                 torch.nn.init.constant_(m.bias, 0)
@@ -193,10 +192,9 @@ class ResNetInv(torch.nn.Module):
         x = torch.flatten(x,1)
         x = self.do(x)
         x = self.fc(x)
-        x = self.tanh(x)
 
         return x
-'''
+
 class ResNetInv2(torch.nn.Module):
 
     def __init__(self, block, layers, numoutputs, dropoutrate):
@@ -218,10 +216,10 @@ class ResNetInv2(torch.nn.Module):
         self.fc3 = torch.nn.Linear(64, 64)
         self.fc4 = torch.nn.Linear(64, 7)
 
-        #TODO: check diff with fan_out and fan_in
+        #TODO: try 'fan_out' init
         for m in self.modules():
             if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
             elif isinstance(m, torch.nn.BatchNorm3d):
                 torch.nn.init.constant_(m.weight,1)
                 torch.nn.init.constant_(m.bias, 0)
@@ -262,7 +260,7 @@ class ResNetInv2(torch.nn.Module):
         x = self.fc4(x)
 
         return x
-'''
+
 def ResNetInvBasic(numoutputs, dropoutrate):
     return ResNetInv(BasicBlockInv, [3,3,4,4,2], numoutputs, dropoutrate)
 
