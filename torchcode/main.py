@@ -36,7 +36,7 @@ if not is_new_save:
 # Experiment specification
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
-purpose = "RESNET-xyz-6400samples-dropout20"
+purpose = "debug-mseloss"
 
 
 # Device
@@ -44,20 +44,20 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
 #random_seed = 123
-learning_rate = 0.001 #0.00001 was good
-num_epochs = 300
-batch_size = 256 if is_new_save else checkpoint['batch_size']
-num_workers = 16
-dropoutrate = 0.2 if is_new_save else checkpoint['dropoutrate']
+learning_rate = 0.0001 #0.00001 was good
+num_epochs = 5000
+batch_size = 1 if is_new_save else checkpoint['batch_size']
+num_workers = 1
+dropoutrate = 0.0 if is_new_save else checkpoint['dropoutrate']
 
 # Architecture
 numoutputs = 3 if is_new_save else checkpoint['numoutputs']
 
 
 starttrain = 0
-endtrain = 6400
-startval = 6400
-endval = 7040
+endtrain = 1
+startval = 1
+endval = 2
 train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", starttrain, endtrain)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
@@ -74,7 +74,7 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
+model = ResNetInvBasic(numoutputs=numoutputs, dropoutrate=dropoutrate)
 
 ##### summaries #####
 summarystring = repr(model)
@@ -91,6 +91,7 @@ if not is_new_save:
     model.load_state_dict(checkpoint['model_state_dict'])
 model = model.to(device)
 
+#optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, eps=0.1)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 if not is_new_save:
@@ -102,6 +103,9 @@ step_val = 0
 
 best_val_loss = 999999.0
 
+#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.95)
+#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.99)
+
 if is_new_save:
     for epoch in range(num_epochs):
         #training
@@ -110,12 +114,12 @@ if is_new_save:
         for batch_idx, (x,y) in enumerate(train_generator):
             #x: volume
             #y: parameters
+            optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
 
             y_predicted = model(x)
-            cost = F.l1_loss(y_predicted, y)
-            optimizer.zero_grad()
-
+            #cost = F.l1_loss(y_predicted, y)
+            cost = F.mse_loss(y_predicted, y)
             cost.backward()
 
             optimizer.step()
@@ -143,7 +147,8 @@ if is_new_save:
             for batch_idy, (x,y) in enumerate(val_generator):
                 x, y = x.to(device), y.to(device)
                 y_predicted = model(x)
-                cost = F.l1_loss(y_predicted, y)
+                #cost = F.l1_loss(y_predicted, y)
+                cost = F.mse_loss(y_predicted, y)
 
                 running_validation_loss += cost
                 writer.add_scalar('Loss/val', cost, step_val)
@@ -163,6 +168,9 @@ if is_new_save:
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                summarystring, additionalsummary)
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
+
+        #scheduler.step()
+        #print(scheduler.get_last_lr())
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()

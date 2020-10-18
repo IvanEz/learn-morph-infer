@@ -30,8 +30,8 @@ class Dataset(torch.utils.data.Dataset):
         file_path = self.all_paths[index]
         #print("got pos " + str(index) + " which corresponds to " + str(file_path))
         with np.load(file_path + "Data_0001.npz") as data:
-            #thrvolume = data['thr_data']
-            thrvolume = data['data']
+            thrvolume = data['thr_data']
+            #thrvolume = data['data']
             thrvolume_resized = np.delete(np.delete(np.delete(thrvolume, 128, 0), 128, 1), 128, 2) #from 129x129x129 to 128x128x128
             #TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
             thrvolume_resized = np.expand_dims(thrvolume_resized, -1) #now it is 128x128x128x1
@@ -69,41 +69,41 @@ class ConvNet(torch.nn.Module):
         self.seq = torch.nn.Sequential(
                     conv3x3(1,2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(2),
+                    #torch.nn.BatchNorm3d(2),
                     conv3x3(2,2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(2),
+                    #torch.nn.BatchNorm3d(2),
                     #--------still 128---------
                     conv3x3(2,4, stride=2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(4),
+                    #torch.nn.BatchNorm3d(4),
                     conv3x3(4,4),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(4),
+                    #torch.nn.BatchNorm3d(4),
                     #--------still 64-------
                     conv3x3(4,8, stride=2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(8),
+                    #torch.nn.BatchNorm3d(8),
                     conv3x3(8,8),   
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(8),
+                    #torch.nn.BatchNorm3d(8),
                     #-------still 32--------
                     conv3x3(8,16, stride=2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(16),
+                    #torch.nn.BatchNorm3d(16),
                     conv3x3(16,16),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(16),
+                    #torch.nn.BatchNorm3d(16),
                     #-------still 16--------   
                     conv3x3(16,32, stride=2),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(32),
+                    #torch.nn.BatchNorm3d(32),
                     conv3x3(32,32),
                     torch.nn.ReLU(),
-                    torch.nn.BatchNorm3d(32),
+                    #torch.nn.BatchNorm3d(32),
                     #-------still 8----------                           
                     torch.nn.Flatten(),
-                    torch.nn.Dropout(p=dropoutrate),
+                    #torch.nn.Dropout(p=dropoutrate),
                     torch.nn.Linear(8*8*8*32, numoutputs)
                     )
 
@@ -118,10 +118,10 @@ class BasicBlockInv(torch.nn.Module):
         norm_layer = torch.nn.BatchNorm3d
         self.conv1 = conv3x3(inplanes, planes, stride=stride)
         self.bn1 = norm_layer(planes)
-        self.relu = torch.nn.ReLU(inplace=True)
+        self.relu = torch.nn.ReLU()
         self.conv2 = conv3x3(planes,planes)
         self.bn2 = norm_layer(planes)
-        self.relu2 = torch.nn.ReLU(inplace=True)
+        self.relu2 = torch.nn.ReLU()
         self.stride = stride
         self.downsample = downsample
         if self.downsample:
@@ -132,18 +132,27 @@ class BasicBlockInv(torch.nn.Module):
         identity = x
 
         out = self.conv1(x)
+        #print(f"Layer: {out.mean()}, {out.std()}")
         out = self.bn1(out)
+        #print(f"Layer: {out.mean()}, {out.std()}")
         out = self.relu(out)
+        #print(f"Layer: {out.mean()}, {out.std()}")
 
         out = self.conv2(out)
+        #print(f"Layer: {out.mean()}, {out.std()}")
         out = self.bn2(out)
+        #print(f"Layer: {out.mean()}, {out.std()}")
 
         if self.downsample is True:
             identity = self.conv3(identity)
+            #print(f"Layer downsample: {identity.mean()}, {identity.std()}")
             identity = self.bn3(identity)
+            #print(f"Layer downsample relu: {identity.mean()}, {identity.std()}")
 
         out += identity
+        #print(f"Layer after addition: {out.mean()}, {out.std()}")
         out = self.relu2(out)
+        #print(f"Layer after relu: {out.mean()}, {out.std()}")
 
         return out
 
@@ -161,14 +170,19 @@ class ResNetInv(torch.nn.Module):
         self.layer5 = self._make_layer(block, 32, layers[4], stride=2)
         self.do = torch.nn.Dropout(p=dropoutrate)
         self.fc = torch.nn.Linear(8*8*8*32, numoutputs)
+        self.tanh = torch.nn.Tanh()
 
         #TODO: try 'fan_out' init
         for m in self.modules():
             if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, torch.nn.BatchNorm3d):
                 torch.nn.init.constant_(m.weight,1)
                 torch.nn.init.constant_(m.bias, 0)
+            #elif isinstance(m, torch.nn.Linear):
+            #    print("initializing linear")
+            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
+                
 
     def _make_layer(self, block, planes, blocks, stride):
         downsample = False
@@ -191,7 +205,12 @@ class ResNetInv(torch.nn.Module):
         x = self.layer5(x)
         x = torch.flatten(x,1)
         x = self.do(x)
+        #print(f"Layer before fc: {x.mean()}, {x.std()}")
         x = self.fc(x)
+        #print(f"Layer after fc: {x.mean()}, {x.std()}")
+        #print("Before tanh: " + str(x))
+        x = self.tanh(x)
+        #print(f"Layer after tanh: {x.mean()}, {x.std()}")
 
         return x
 
