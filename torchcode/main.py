@@ -51,18 +51,18 @@ num_workers = 1
 dropoutrate = 0.0 if is_new_save else checkpoint['dropoutrate']
 
 # Architecture
-numoutputs = 3 if is_new_save else checkpoint['numoutputs']
+numoutputs = 7 if is_new_save else checkpoint['numoutputs']
 
 
 starttrain = 0
 endtrain = 1
 startval = 1
 endval = 2
-train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", starttrain, endtrain)
+train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_copy/Dataset/", startval, endval)
+val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
