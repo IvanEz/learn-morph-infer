@@ -217,39 +217,36 @@ class ResNetInv(torch.nn.Module):
 class ResNetInv2(torch.nn.Module):
 
     def __init__(self, block, layers, numoutputs, dropoutrate):
-        super(ResNetInv, self).__init__()
+        super(ResNetInv2, self).__init__()
 
         self.inplanes = 1 #initial number of channels
 
-        self.relu = torch.nn.ReLU()
-        self.layer1 = self._make_layer(block, 1, layers[0], stride=1)
+        self.layer1 = self._make_layer(block, 2, layers[0], stride=1)
         self.layer2 = self._make_layer(block, 4, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 8, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 16, layers[3], stride=2)
         self.layer5 = self._make_layer(block, 32, layers[4], stride=2)
         self.layer6 = self._make_layer(block, 64, layers[5], stride=2)
-        self.fc = torch.nn.Linear(4*4*4*64, 64)
         self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc2 = torch.nn.Linear(64, 64)
-        self.do2 = torch.nn.Dropout(p=dropoutrate)
-        self.fc3 = torch.nn.Linear(64, 64)
-        self.fc4 = torch.nn.Linear(64, 7)
+        self.fc = torch.nn.Linear(4*4*4*64, numoutputs)
+        self.tanh = torch.nn.Tanh()
 
         #TODO: try 'fan_out' init
         for m in self.modules():
             if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, torch.nn.BatchNorm3d):
                 torch.nn.init.constant_(m.weight,1)
                 torch.nn.init.constant_(m.bias, 0)
+            #elif isinstance(m, torch.nn.Linear):
+            #    print("initializing linear")
+            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
+                
 
     def _make_layer(self, block, planes, blocks, stride):
-        downsample = None
+        downsample = False
         if stride != 1 or self.inplanes != planes:
-            downsample = torch.nn.Sequential(
-                conv1x1(self.inplanes, planes, stride),
-                torch.nn.BatchNorm3d(planes)
-            )
+            downsample = True
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
@@ -266,22 +263,22 @@ class ResNetInv2(torch.nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
-        x = torch.flatten(x, 1)
-        x = self.fc(x)
-        x = self.relu(x)
+        x = torch.flatten(x,1)
         x = self.do(x)
-        x = self.fc2(x)
-        x = self.relu(x)
-        x = self.do2(x)
-        x = self.fc3(x)
-        x = self.relu(x)
-        #here dropout maybe
-        x = self.fc4(x)
+        #print(f"Layer before fc: {x.mean()}, {x.std()}")
+        x = self.fc(x)
+        #print(f"Layer after fc: {x.mean()}, {x.std()}")
+        #print("Before tanh: " + str(x))
+        x = self.tanh(x)
+        #print(f"Layer after tanh: {x.mean()}, {x.std()}")
 
         return x
 
 def ResNetInvBasic(numoutputs, dropoutrate):
     return ResNetInv(BasicBlockInv, [3,3,4,4,2], numoutputs, dropoutrate)
+
+def ResNetInv2Deeper(numoutputs, dropoutrate):
+    return ResNetInv2(BasicBlockInv, [2,4,5,6,4,2], numoutputs, dropoutrate)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate,

@@ -36,7 +36,7 @@ if not is_new_save:
 # Experiment specification
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
-purpose = "debug-mseloss"
+purpose = "resnetdeep-32000-dropout5"
 
 
 # Device
@@ -45,19 +45,19 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Hyperparameters
 #random_seed = 123
 learning_rate = 0.0001 #0.0001 was good
-num_epochs = 5000
+num_epochs = 700
 batch_size = 128 if is_new_save else checkpoint['batch_size']
 num_workers = 32
-dropoutrate = 0.3 if is_new_save else checkpoint['dropoutrate']
+dropoutrate = 0.5 if is_new_save else checkpoint['dropoutrate']
 
 # Architecture
 numoutputs = 7 if is_new_save else checkpoint['numoutputs']
 
 
 starttrain = 0
-endtrain = 6400
-startval = 80000
-endval = 87936
+endtrain = 32000
+startval = 32000
+endval = 35200
 train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
@@ -74,7 +74,7 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-model = ResNetInvBasic(numoutputs=numoutputs, dropoutrate=dropoutrate)
+model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
 
 ##### summaries #####
 summarystring = repr(model)
@@ -103,8 +103,8 @@ step_val = 0
 
 best_val_loss = 999999.0
 
+#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.978)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.978)
-#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.99)
 
 if is_new_save:
     for epoch in range(num_epochs):
