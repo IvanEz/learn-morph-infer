@@ -307,7 +307,7 @@ class ResNetInv2(torch.nn.Module):
 class ResNetInv2Pool(torch.nn.Module):
 
     def __init__(self, block, layers, numoutputs, dropoutrate):
-        super(ResNetInv2, self).__init__()
+        super(ResNetInv2Pool, self).__init__()
 
         self.inplanes = 1  # initial number of channels
 
