@@ -114,7 +114,8 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
+model = ResNetInv2DeeperPool(numoutputs=numoutputs, dropoutrate=dropoutrate)
+#model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
 #model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
 
 ##### summaries #####
