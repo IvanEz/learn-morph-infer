@@ -75,7 +75,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #random_seed = 123
 learning_rate = args.lr #0.0001 was good
 num_epochs = args.num_epochs
-batch_size = args.batch_size if is_new_save else checkpoint['batch_size']
+#batch_size = args.batch_size if is_new_save else checkpoint['batch_size']
+batch_size = args.batch_size
 num_workers = args.num_workers
 dropoutrate = args.dropoutrate if is_new_save else checkpoint['dropoutrate']
 lr_scheduler_rate = args.lr_scheduler_rate
@@ -100,8 +101,11 @@ val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", s
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-assert len(train_dataset) % batch_size == 0
-assert len(val_dataset) % batch_size == 0
+#assert len(train_dataset) % batch_size == 0
+#assert len(val_dataset) % batch_size == 0
+
+if is_new_save:
+    assert len(train_dataset) % batch_size == 0
 
 # Setting up model
 if is_new_save:
