@@ -11,8 +11,6 @@ from torchvision import datasets
 from torchvision import transforms
 from mycode import *
 import matplotlib.pyplot as plt
-import random
-import pickle5 as pickle
 
 from torchsummary import summary_string
 from torch.autograd import Variable
@@ -21,17 +19,11 @@ import os
 from datetime import datetime
 import argparse
 
-seed = np.random.randint(0,10000000)
-torch.manual_seed(seed)
-np.random.seed(seed)
-random.seed(seed)
-
-version = "v3"
+version = "v2"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
 parser.add_argument('--isnewsave', action='store_true') #--isnewsave -> training, if not there: inference
-parser.add_argument('--isdebug', action='store_true') #saves statistics but does not create .pt files
 
 parser.add_argument('--purpose', default="resnetdeep-80000-dropout2-lr0001-exp978", type=str) #if isnewsave: include!
 parser.add_argument('--loaddir', default="/mnt/Drive2/ivan_kevin/log/torchimpl/2410-08-01-59-resnetdeep-64000-dropout4-lr0001-exp978/bestval-model.pt", type=str) #if is not new save: include!
@@ -64,7 +56,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
 ##########################
 
 is_new_save = args.isnewsave
-is_debug = args.isdebug
 loaddir = args.loaddir #choose directory from which to load from if is_new_save = False, do not end with '/'
 
 if not is_new_save:
@@ -100,12 +91,12 @@ endtrain = args.endtrain #6400 / 16000 / 32000 / 64000 / 80000
 startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external validation: 80000
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
-train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
+train_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
                         "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
+val_dataset = Dataset("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
                       "/mnt/Drive2/ivan_kevin/thresholds/files")
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
@@ -133,11 +124,11 @@ model = ResNetInv2DeeperPool(numoutputs=numoutputs, dropoutrate=dropoutrate)
 summarystring = repr(model)
 print(summarystring)
 
-additionalsummary, _ = summary_string(model, (2,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
+additionalsummary, _ = summary_string(model, (1,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 print(additionalsummary)
 
 if is_new_save:
-    writer.add_graph(model, Variable(torch.rand(1,2,128,128,128)))
+    writer.add_graph(model, Variable(torch.rand(1,1,128,128,128)))
 ##### summaries #####
 ##########################################
 if not is_new_save:
@@ -233,7 +224,7 @@ if is_new_save:
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                 lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
-                                schedulername, lossfunctionname, seed, is_debug,
+                                schedulername, lossfunctionname,
                                summarystring, additionalsummary, '/bestval-model.pt')
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
@@ -241,7 +232,7 @@ if is_new_save:
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
                                total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
-                               schedulername, lossfunctionname, seed, is_debug,
+                               schedulername, lossfunctionname,
                                summarystring, additionalsummary, '/epoch' + str(epoch) + '.pt')
             lastsavetime = time.time()
             print(">>> Saved!")
@@ -256,34 +247,6 @@ else:
     lossmatrix = []
     ys = []
     yspredicted = []
-
-    lambdas = []
-    mus = []
-    velocities = []
-
-    for path in (train_dataset.all_paths + val_dataset.all_paths):
-        with open(path + "parameter_tag2.pkl", "rb") as par:
-            params = pickle.load(par)
-            Dw = params['Dw']  # cm^2 / d
-            rho = params['rho']  # 1 / d
-            Tend = params['Tend']  # d
-
-            lambdaw = np.sqrt(Dw / rho)  # cm
-            mu = Tend * rho  # constant
-            velocity = 2 * np.sqrt(Dw * rho)  # cm / d
-
-            lambdas.append(lambdaw)
-            mus.append(mu)
-            velocities.append(velocity)
-
-    lambda_min = np.min(lambdas)
-    lambda_max = np.max(lambdas)
-    mu_min = np.min(mus)
-    mu_max = np.max(mus)
-    velocity_min = np.min(velocities)
-    velocity_max = np.max(velocities)
-
-
     with torch.set_grad_enabled(False):
         for batch_idy, (x, y) in enumerate(val_generator):
             x, y = x.to(device), y.to(device)
@@ -312,7 +275,7 @@ else:
             print("Output " + str(outputfeature) + " error: mean = " + str(np.round(mean, 4)) + ", std = " + str(np.round(std, 4)))
 
             plt.figure()
-            plt.hist(losses, bins=100, range=(0.0, 1.0))
+            plt.hist(losses, bins=100)
             plt.title(loaddir + ": \n " + str(outputfeature))
             plt.savefig("fig" + str(outputfeature) + ".png")
 
@@ -325,40 +288,4 @@ else:
         print("##########################################")
 
         np.savez_compressed("results.npz", losses=lossmatrix, ys = ys, yspredicted = yspredicted) #still in normalization range [-1,1] !
-
-
-        print("############# RANGED ERROR ##################")
-        #Calculates error not based on the theoretical minimum and maximum range, but based on the
-        #minimum and maximum observed values in the dataset (since theoretical range much bigger for some vars)
-        #through combination
-        '''
-        lambdas_normalized = ys[:,2] #all lambdaw
-        lambdas = np.interp(lambdas_normalized, mycode.normalization_range, [np.sqrt(0.001), np.sqrt(7.5)])
-
-        predicted_lambdas_normalized = yspredicted[:, 2]
-        predicted_lambdas = np.interp(predicted_lambdas_normalized, mycode.normalization_range, [np.sqrt(0.001), np.sqrt(7.5)])
-
-        lambdas = np.interp(lambdas, [lambda_min, lambda_max], [0.0, 1.0])
-        predicted_lambdas = np.interp(predicted_lambdas, [lambda_min, lambda_max], [0.0, 1.0])
-
-        ranged_error_lambda = np.abs(predicted_lambdas - lambdas)
-
-        mean = np.mean(ranged_error_lambda)
-        std = np.std(ranged_error_lambda)
-
-        print("Ranged lambda error: mean = " + str(np.round(mean, 4)) + ", std = " + str(np.round(std, 4)))
-
-        plt.figure()
-        plt.hist(ranged_error_lambda, bins=100, range=(0.0, 1.0))
-        plt.title(loaddir + ": \n " + "ranged error lambda")
-        plt.savefig("fig" + "RANGEDLAMBDAERROR" + ".png")
-        '''
-        #####################################################################################
-
-        ranged_error("lambda", 2, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max], loaddir)
-        ranged_error("mu", 3, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
-        ranged_error("v", 4, [2*np.sqrt(4e-7), 2*np.sqrt(0.003)], ys, yspredicted, [velocity_min, velocity_max], loaddir)
-
-
-        print("############# RANGED ERROR ##################")
 
