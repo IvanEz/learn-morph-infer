@@ -615,6 +615,6 @@ def ranged_error(name, index, original_range, ys, yspredicted, observed_range, l
     print("Ranged " + name + " error: mean = " + str(np.round(mean, 6)) + ", std = " + str(np.round(std, 6)))
 
     plt.figure()
-    plt.hist(ranged_error_var, bins=100)
+    plt.hist(ranged_error_var, bins=100, range=(0.0, 1.0))
     plt.title(loaddir + ": \n " + "ranged error " + name)
     plt.savefig("fig" + name + ".png")
