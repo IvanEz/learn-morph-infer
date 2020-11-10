@@ -578,6 +578,9 @@ def ResNetInv2DeeperPool(numoutputs, dropoutrate):
 def ResNetInv2DeeperPoolNL(numoutputs, dropoutrate):
     return ResNetInv2PoolNL(BasicBlockInv, [2,4,5,6,4,2], numoutputs, dropoutrate)
 
+def ResNetInv2SmallPool(numoutputs, dropoutrate):
+    return ResNetInv2Pool(BasicBlockInv, [2,1,1,1,1,1], numoutputs, dropoutrate)
+
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
                        starttrain, endtrain, startval, endval, version, schedulername, lossfunctionname, seed, is_debug,
