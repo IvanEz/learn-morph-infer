@@ -227,7 +227,7 @@ class ConvNet(torch.nn.Module):
 class ConvNet2(torch.nn.Module):
 
     def __init__(self, numoutputs, dropoutrate=0.2):
-        super(ConvNet, self).__init__()
+        super(ConvNet2, self).__init__()
 
         self.seq = torch.nn.Sequential(
                     conv3x3(2,2),
