@@ -272,8 +272,8 @@ if is_new_save:
 
         if reduce_lr_on_flat:
             scheduler.step(total_val_loss)
-            print(scheduler.get_last_lr())
-            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
+            print(optimizer.param_groups[0]['lr'])
+            writer.add_scalar('lr', optimizer.param_groups[0]['lr'], epoch)
 
 
     print("Best val loss: %.6f"%(best_val_loss))
