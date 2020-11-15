@@ -321,44 +321,6 @@ class BasicBlockInv(torch.nn.Module):
 
         return out
 
-
-class BasicBlockInv_PreAct_Pool(torch.nn.Module):
-    def __init__(self, inplanes, downsample=False):
-        super(BasicBlockInv_PreAct_Pool, self).__init__()
-
-        self.downsample = downsample
-        if self.downsample:
-            self.maxpool1 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-
-        self.bn1 = torch.nn.BatchNorm3d(inplanes)
-        self.relu1 = torch.nn.ReLU()
-        self.conv1 = conv3x3(inplanes, inplanes)
-
-        self.bn2 = torch.nn.BatchNorm3d(inplanes)
-        self.relu2 = torch.nn.ReLU()
-        self.conv2 = conv3x3(inplanes, inplanes)
-
-
-    def forward(self, x):
-
-        if self.downsample:
-            x = self.maxpool1(x)
-
-        out = self.bn1(x)
-        out = self.relu1(out)
-        out = self.conv1(out)
-
-        out = self.bn2(out)
-        out = self.relu2(out)
-        out = self.conv2(out)
-
-        if self.downsample:
-            out = torch.cat((x, out), 1) #double the amount of channels through concatenation
-        else:
-            out = out + x
-
-        return out
-
 class ResNetInv(torch.nn.Module):
 
     def __init__(self, block, layers, numoutputs, dropoutrate):
@@ -663,71 +625,6 @@ class ResNetInv2Pool_5(torch.nn.Module):
 
         return x
 
-#based on preactivation resnet (see paper+code), removes skip connection with stride 1, replaced by concatenation (see FishNet, DenseNet)
-#we get rid of I-convs
-class ResNetInvPreActDirect(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, dropoutrate):
-        super(ResNetInvPreActDirect, self).__init__()
-
-        self.inplanes = 2  # initial number of channels
-
-        self.layer1 = self._make_layer(block, layers[0], doublechannels=False)
-        self.layer2 = self._make_layer(block, layers[1], doublechannels=True)
-        self.layer3 = self._make_layer(block, layers[2], doublechannels=True)
-        self.layer4 = self._make_layer(block, layers[3], doublechannels=True)
-        self.layer5 = self._make_layer(block, layers[4], doublechannels=True)
-
-        self.bn_final = torch.nn.BatchNorm3d(32)
-        self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(32, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                torch.nn.init.constant_(m.weight, 1)
-                torch.nn.init.constant_(m.bias, 0)
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, doublechannels=False):
-        downsample = doublechannels
-
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        self.inplanes = 2 * self.inplanes if downsample else self.inplanes
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        x = self.layer5(x)
-
-        x = self.bn_final(x)
-        x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
-
 def ResNetInvBasic(numoutputs, dropoutrate):
     return ResNetInv(BasicBlockInv, [3,3,4,4,2], numoutputs, dropoutrate)
 
@@ -746,13 +643,9 @@ def ResNetInv2SmallPool(numoutputs, dropoutrate):
 def ResNetInv2SmallPool_5(numoutputs, dropoutrate):
     return ResNetInv2Pool_5(BasicBlockInv, [1,0,0,0,0], numoutputs, dropoutrate)
 
-def ResNetInvPreActDirect_Small(numoutputs, dropoutrate):
-    return ResNetInvPreActDirect(BasicBlockInv_PreAct_Pool, [2,2,2,2,2], numoutputs, dropoutrate)
-
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
                        starttrain, endtrain, startval, endval, version, schedulername, lossfunctionname, seed, is_debug,
-                       optimizername, weight_decay_sgd, modelfun_name, lr_patience,
                        summarystring, additionalsummary, savefilename):
     if not is_debug:
         torch.save({'epoch': epoch, 'model_state_dict': model_state_dict, 'optimizer_state_dict': optimizer_state_dict,
@@ -760,8 +653,7 @@ def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict
                     'batch_size': batch_size, 'numoutputs': numoutputs, 'learning_rate': learning_rate,
                     'lr_scheduler_rate': lr_scheduler_rate, 'starttrain': starttrain, 'endtrain': endtrain,
                     'startval': startval, 'endval': endval, 'version': version, 'schedulername': schedulername,
-                    'lossfunctionname': lossfunctionname, 'seed': seed, 'modelfun_name': modelfun_name,
-                    'optimizername': optimizername, 'weight_decay_sgd': weight_decay_sgd, 'lr_patience': lr_patience,
+                    'lossfunctionname': lossfunctionname, 'seed': seed,
                     'summarystring': summarystring, 'additionalsummary': additionalsummary},
                    savelogdir + savefilename)
 

@@ -26,7 +26,7 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v4"
+version = "v3"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
@@ -49,11 +49,6 @@ parser.add_argument('--startval', default=80000, type=int)
 parser.add_argument('--endval', default=88000, type=int)
 
 parser.add_argument("--num_thresholds", default=100, type=int, choices=range(1,101))
-
-parser.add_argument('--is_sgd', action='store_true')
-parser.add_argument('--reduce_lr_on_flat', action='store_true')
-parser.add_argument('--weight_decay_sgd', default=0.0, type=float)
-parser.add_argument('--lr_patience', default=10, type=int)
 
 args = parser.parse_args()
 print(args)
@@ -96,11 +91,6 @@ dropoutrate = args.dropoutrate if is_new_save else checkpoint['dropoutrate']
 lr_scheduler_rate = args.lr_scheduler_rate
 num_thresholds = args.num_thresholds
 
-is_sgd = args.is_sgd
-reduce_lr_on_flat = args.reduce_lr_on_flat
-weight_decay_sgd = args.weight_decay_sgd
-lr_patience = args.lr_patience
-
 # Architecture
 numoutputs = 8 if is_new_save else checkpoint['numoutputs']
 
@@ -127,7 +117,6 @@ if is_new_save:
     assert len(train_dataset) % batch_size == 0
     if len(val_dataset) % batch_size != 0:
         print("WARNING: val dataset size is not multiple of batch size!")
-        time.sleep(30)
 
 # Setting up model
 if is_new_save:
@@ -136,9 +125,7 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-modelfun = ResNetInv2DeeperPool
-model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
-modelfun_name = modelfun.__name__
+model = ResNetInv2DeeperPool(numoutputs=numoutputs, dropoutrate=dropoutrate)
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
 #model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
 
@@ -158,13 +145,7 @@ if not is_new_save:
 model = model.to(device)
 
 #optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, eps=0.1)
-if not is_sgd:
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-else:
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9,
-                                weight_decay=weight_decay_sgd, nesterov=True) #we use nesterov, CS231n recommendation
-
-optimizername = optimizer.__class__.__name__
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 if not is_new_save:
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -176,17 +157,13 @@ step_val = 0
 best_val_loss = 999999.0
 
 #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.978)
-if not reduce_lr_on_flat:
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, lr_scheduler_rate) #0.95 - 0.978
-else:
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=lr_patience)
-schedulername = scheduler.__class__.__name__
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, lr_scheduler_rate) #0.95 - 0.978
+schedulername = scheduler.__class__.__name__ #save it in case you change it and try something new
 
 numberofbatches = len(train_generator)
 numberofbatches_val = len(val_generator)
 
-#lossfunction = F.l1_loss
-lossfunction = F.mse_loss
+lossfunction = F.l1_loss
 lossfunctionname = lossfunction.__name__
 
 if is_new_save:
@@ -219,10 +196,11 @@ if is_new_save:
 
             step += 1
 
-            if not reduce_lr_on_flat:
-                scheduler.step()
-                print(scheduler.get_last_lr())
-                writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch * numberofbatches + batch_idx)
+            scheduler.step()
+            print(scheduler.get_last_lr())
+            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch * numberofbatches + batch_idx)
+
+
 
         total_train_loss = (running_training_loss / numberofbatches).item() #avg loss in epoch!
         print('Epoch: %03d | Average loss: %.6f'%(epoch+1, total_train_loss))
@@ -250,14 +228,13 @@ if is_new_save:
         writer.add_scalar('Loss/avg_val', total_val_loss, epoch)
         writerval.add_scalar('losses', total_val_loss, epoch)
 
-        if np.round(total_val_loss,8) < np.round(best_val_loss,8):
+        if np.round(total_val_loss,5) < np.round(best_val_loss,5):
             best_val_loss = total_val_loss
             save_inverse_model(savelogdir, epoch, model.state_dict(), optimizer.state_dict(), best_val_loss,
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                 lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                 schedulername, lossfunctionname, seed, is_debug,
-                                optimizername, weight_decay_sgd, modelfun_name, lr_patience,
-                                summarystring, additionalsummary, '/bestval-model.pt')
+                               summarystring, additionalsummary, '/bestval-model.pt')
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
         if (time.time() - lastsavetime) > 3600.0: #more than an hour has passed since last save
@@ -265,16 +242,9 @@ if is_new_save:
                                total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                schedulername, lossfunctionname, seed, is_debug,
-                               optimizername, weight_decay_sgd, modelfun_name, lr_patience,
                                summarystring, additionalsummary, '/epoch' + str(epoch) + '.pt')
             lastsavetime = time.time()
             print(">>> Saved!")
-
-        if reduce_lr_on_flat:
-            scheduler.step(total_val_loss)
-            print(scheduler.get_last_lr())
-            writer.add_scalar('lr', scheduler.get_last_lr()[0], epoch)
-
 
     print("Best val loss: %.6f"%(best_val_loss))
     writer.close()
