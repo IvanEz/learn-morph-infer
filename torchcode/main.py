@@ -136,7 +136,8 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-modelfun = ResNetInv2DeeperPool
+#modelfun = ResNetInv2DeeperPool
+modelfun = ResNetInvPreActDirect_Small
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
