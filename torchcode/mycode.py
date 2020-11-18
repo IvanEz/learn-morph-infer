@@ -746,8 +746,11 @@ def ResNetInv2SmallPool(numoutputs, dropoutrate):
 def ResNetInv2SmallPool_5(numoutputs, dropoutrate):
     return ResNetInv2Pool_5(BasicBlockInv, [1,0,0,0,0], numoutputs, dropoutrate)
 
-def ResNetInvPreActDirect_Small(numoutputs, dropoutrate):
+def ResNetInvPreActDirect_Small(numoutputs, dropoutrate): #like resnet18
     return ResNetInvPreActDirect(BasicBlockInv_PreAct_Pool, [2,2,2,2,2], numoutputs, dropoutrate)
+
+def ResNetInvPreActDirect_Medium(numoutputs, dropoutrate): #like resnet34
+    return ResNetInvPreActDirect(BasicBlockInv_PreAct_Pool, [2,3,4,6,3], numoutputs, dropoutrate)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,

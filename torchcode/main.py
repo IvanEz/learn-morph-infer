@@ -137,7 +137,8 @@ if is_new_save:
 
 #torch.manual_seed(random_seed)
 #modelfun = ResNetInv2DeeperPool
-modelfun = ResNetInvPreActDirect_Small
+#modelfun = ResNetInvPreActDirect_Small
+modelfun = ResNetInvPreActDirect_Medium
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
