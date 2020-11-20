@@ -139,7 +139,7 @@ if is_new_save:
 #modelfun = ResNetInv2DeeperPool
 #modelfun = ResNetInvPreActDirect_Small
 #modelfun = ResNetInvPreActDirect_Medium
-modelfun = ResNetInvPreActDirect_Wider_2_Medium
+modelfun = PreActNetConstant_16_n1
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
@@ -162,7 +162,7 @@ model = model.to(device)
 
 #optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, eps=0.1)
 if not is_sgd:
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay_sgd)
 else:
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9,
                                 weight_decay=weight_decay_sgd, nesterov=True) #we use nesterov, CS231n recommendation
