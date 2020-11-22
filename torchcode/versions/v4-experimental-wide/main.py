@@ -122,7 +122,9 @@ val_generator = torch.utils.data.DataLoader(val_dataset,
 
 #assert len(train_dataset) % batch_size == 0
 #assert len(val_dataset) % batch_size == 0
-
+print(len(train_generator))
+print(len(val_generator))
+time.sleep(10)
 if is_new_save:
     assert len(train_dataset) % batch_size == 0
     if len(val_dataset) % batch_size != 0:
