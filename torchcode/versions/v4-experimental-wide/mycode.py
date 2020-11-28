@@ -1037,6 +1037,9 @@ def NetConstant_noBN_16_n1(numoutputs, dropoutrate): #we keep dropout rate altho
 def NetConstant_noBN_32_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
     return NetConstant_noBN(BasicBlockInv_Pool_constant_noBN, [1,1,1,1,1], numoutputs, 32)
 
+def NetConstant_noBN_64_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
+    return NetConstant_noBN(BasicBlockInv_Pool_constant_noBN, [1,1,1,1,1], numoutputs, 64)
+
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
                        starttrain, endtrain, startval, endval, version, schedulername, lossfunctionname, seed, is_debug,

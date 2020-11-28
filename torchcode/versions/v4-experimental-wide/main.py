@@ -142,8 +142,9 @@ if is_new_save:
 #modelfun = ResNetInvPreActDirect_Small
 #modelfun = ResNetInvPreActDirect_Medium
 #modelfun = PreActNetConstant_16_n1
-modelfun = NetConstant_noBN_16_n1
+#modelfun = NetConstant_noBN_16_n1
 #modelfun = NetConstant_noBN_32_n1
+modelfun = NetConstant_noBN_64_n1
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
