@@ -89,9 +89,9 @@ class Dataset2(Dataset):
     # after bringing into range [-1, 1] was at 0. Since we now predict products of these factors, we can observe
     # our data and see that when we normalize into [-1, 1] range, the mean (of our TRAINING DATA) is not at 0 anymore!
     # --> this is done in NL architecture!
-    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100, includesft=False):
+    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100):
         Dataset.__init__(self, datapath, beginning, ending, thrpath, num_thresholds=num_thresholds)
-        self.includesft = includesft
+
 
     def __len__(self):
         return self.datasetsize
@@ -108,8 +108,7 @@ class Dataset2(Dataset):
         with np.load(file_path + "Data_0001_thr2.npz") as data:
             # thrvolume = data['thr2_data']
             volume = data['data']
-            volume_resized = volume
-            #volume_resized = np.delete(np.delete(np.delete(volume, 128, 0), 128, 1), 128, 2)  # from 129x129x129 to 128x128x128
+            volume_resized = np.delete(np.delete(np.delete(volume, 128, 0), 128, 1), 128, 2)  # from 129x129x129 to 128x128x128
             # TODO: check if deletion removed nonzero entries (especially last slice: thrvolume[...][...][128])
 
             # t1gd_thr = round(0.35 * self.rngs[index].rand() + 0.5, 5)
@@ -120,25 +119,18 @@ class Dataset2(Dataset):
 
             thr_volume = 0.666 * t1gd_volume + 0.333 * flair_volume
 
-            thrvolume_resized = np.expand_dims(thr_volume, -1)  # now it is 129x129x129x1
+            thrvolume_resized = np.expand_dims(thr_volume, -1)  # now it is 128x128x128x1
             #print(thrvolume_resized.shape)
 
             b = 0.5
 
             pet_volume = ((volume_resized >= t1gd_thr) * volume_resized) / b
             #print(pet_volume.shape)
-            pet_volume_reshaped = np.expand_dims(pet_volume, -1) #now 129x129x129x1
+            pet_volume_reshaped = np.expand_dims(pet_volume, -1) #now 128x128x128x1
             #print(pet_volume_reshaped.shape)
 
             nn_input = np.concatenate((thrvolume_resized, pet_volume_reshaped), -1)
             #print(nn_input.shape)
-
-            if self.includesft:
-                ft = np.abs(np.fft.fftshift(np.fft.fftn(thr_volume + pet_volume, norm='ortho')))
-                ft_reshaped = np.expand_dims((ft / np.max(ft)), -1)
-                nn_input = np.concatenate((nn_input, ft_reshaped), -1)
-                if index == 0:
-                    print("Shape is " + str(nn_input.shape) + ", should be (129,129,129,3)")
 
         with open(file_path + "parameter_tag2.pkl", "rb") as par:
             # TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
@@ -179,9 +171,6 @@ class Dataset2(Dataset):
 
 def conv3x3(in_planes, out_planes, stride=1, padding=1):
     return torch.nn.Conv3d(in_planes, out_planes, kernel_size=3, stride=stride, padding=padding, bias=False)
-
-def conv3x3_biased(in_planes, out_planes, stride=1, padding=1):
-    return torch.nn.Conv3d(in_planes, out_planes, kernel_size=3, stride=stride, padding=padding, bias=True)
 
 def conv1x1(in_planes, out_planes, stride=1, padding=0):
     return torch.nn.Conv3d(in_planes, out_planes, kernel_size=1, stride=stride, padding=padding, bias=False)
@@ -399,40 +388,6 @@ class BasicBlockInv_PreAct_Pool_constant(torch.nn.Module):
         out = self.bn2(out)
         out = self.relu2(out)
         out = self.conv2(out)
-
-        out = out + x
-
-        return out
-
-class BasicBlockInv_Pool_constant_noBN(torch.nn.Module):
-    def __init__(self, inplanes, downsample=False):
-        super(BasicBlockInv_Pool_constant_noBN, self).__init__()
-
-        self.downsample = downsample
-        if self.downsample:
-            self.maxpool1 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-
-        #self.bn1 = torch.nn.BatchNorm3d(inplanes)
-        self.conv1 = conv3x3_biased(inplanes, inplanes)
-        self.relu1 = torch.nn.ReLU()
-
-        #self.bn2 = torch.nn.BatchNorm3d(inplanes)
-        self.conv2 = conv3x3_biased(inplanes, inplanes)
-        self.relu2 = torch.nn.ReLU()
-
-
-    def forward(self, x):
-
-        if self.downsample:
-            x = self.maxpool1(x)
-
-        #out = self.bn1(x)
-        out = self.conv1(x)
-        out = self.relu1(out)
-
-        #out = self.bn2(out)
-        out = self.conv2(out)
-        out = self.relu2(out)
 
         out = out + x
 
@@ -808,13 +763,13 @@ class ResNetInvPreActDirect(torch.nn.Module):
         return x
 
 #intended for bigger num of channels at beginning
-class ResNetInvPreActDirect_Wider_2(torch.nn.Module):
+class ResNetInvPreActDirect_Wider(torch.nn.Module):
     def __init__(self, block, constantblock, layers, numoutputs, dropoutrate, channels):
-        super(ResNetInvPreActDirect_Wider_2, self).__init__()
+        super(ResNetInvPreActDirect_Wider, self).__init__()
 
         self.inplanes = 2  # initial number of channels
 
-        self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=False)
+        self.conv1 = conv3x3(self.inplanes, channels)
         self.inplanes = channels
 
         self.layer1 = self._make_layer(block, layers[0], downsample=False, doubling=False)
@@ -874,212 +829,6 @@ class ResNetInvPreActDirect_Wider_2(torch.nn.Module):
 
         return x
 
-#intended for bigger num of channels at beginning
-class PreActNetConstant(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, channels):
-        super(PreActNetConstant, self).__init__()
-
-        self.inplanes = 2  # initial number of channels
-
-        self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=False)
-        self.inplanes = channels
-
-        self.layer1 = self._make_layer(block, layers[0], downsample=False)
-        self.layer2 = self._make_layer(block, layers[1])
-        self.layer3 = self._make_layer(block, layers[2])
-        self.layer4 = self._make_layer(block, layers[3])
-        self.layer5 = self._make_layer(block, layers[4])
-
-        self.bn_final = torch.nn.BatchNorm3d(channels)
-        self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        #self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                torch.nn.init.constant_(m.weight, 1)
-                torch.nn.init.constant_(m.bias, 0)
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, downsample=True):
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        x = self.layer5(x)
-
-        x = self.bn_final(x)
-        x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        #x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
-
-class NetConstant_noBN(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, channels):
-        super(NetConstant_noBN, self).__init__()
-
-        self.inplanes = 2  # initial number of channels
-
-        self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=True)
-        self.relu1 = torch.nn.ReLU()
-        self.inplanes = channels
-
-        self.layer1 = self._make_layer(block, layers[0], downsample=False)
-        self.layer2 = self._make_layer(block, layers[1])
-        self.layer3 = self._make_layer(block, layers[2])
-        self.layer4 = self._make_layer(block, layers[3])
-        self.layer5 = self._make_layer(block, layers[4])
-
-        #self.bn_final = torch.nn.BatchNorm3d(channels)
-        #self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        #self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                #torch.nn.init.constant_(m.weight, 1)
-                #torch.nn.init.constant_(m.bias, 0)
-                raise Exception("no batchnorm")
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, downsample=True):
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.relu1(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        x = self.layer5(x)
-
-        #x = self.bn_final(x)
-        #x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        #x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
-
-class NetConstant_noBN_l4(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, channels, includesft=False):
-        super(NetConstant_noBN_l4, self).__init__()
-
-        if not includesft:
-            self.inplanes = 2  # initial number of channels
-        else:
-            self.inplanes = 3
-
-        self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=True)
-        self.relu1 = torch.nn.ReLU()
-        self.inplanes = channels
-
-        self.layer1 = self._make_layer(block, layers[0], downsample=False)
-        self.layer2 = self._make_layer(block, layers[1])
-        self.layer3 = self._make_layer(block, layers[2])
-        self.layer4 = self._make_layer(block, layers[3])
-        #self.layer5 = self._make_layer(block, layers[4])
-
-        #self.bn_final = torch.nn.BatchNorm3d(channels)
-        #self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        #self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                #torch.nn.init.constant_(m.weight, 1)
-                #torch.nn.init.constant_(m.bias, 0)
-                raise Exception("no batchnorm")
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, downsample=True):
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.relu1(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        #x = self.layer5(x)
-
-        #x = self.bn_final(x)
-        #x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        #x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
-
-
 def ResNetInvBasic(numoutputs, dropoutrate):
     return ResNetInv(BasicBlockInv, [3,3,4,4,2], numoutputs, dropoutrate)
 
@@ -1104,31 +853,13 @@ def ResNetInvPreActDirect_Small(numoutputs, dropoutrate): #like resnet18
 def ResNetInvPreActDirect_Medium(numoutputs, dropoutrate): #like resnet34
     return ResNetInvPreActDirect(BasicBlockInv_PreAct_Pool, [2,3,4,6,3], numoutputs, dropoutrate)
 
-def ResNetInvPreActDirect_Wider_2_Medium(numoutputs, dropoutrate):
-    return ResNetInvPreActDirect_Wider_2(BasicBlockInv_PreAct_Pool, BasicBlockInv_PreAct_Pool_constant, [1,6,2,1,1], numoutputs, dropoutrate, 16)
-
-def PreActNetConstant_16_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
-    return PreActNetConstant(BasicBlockInv_PreAct_Pool_constant, [1,1,1,1,1], numoutputs, 16)
-
-def NetConstant_noBN_16_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN(BasicBlockInv_Pool_constant_noBN, [1,1,1,1,1], numoutputs, 16)
-
-def NetConstant_noBN_32_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN(BasicBlockInv_Pool_constant_noBN, [1,1,1,1,1], numoutputs, 32)
-
-def NetConstant_noBN_64_n1(numoutputs, dropoutrate): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN(BasicBlockInv_Pool_constant_noBN, [1,1,1,1,1], numoutputs, 64)
-
-def NetConstant_noBN_64_n1_l4(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN_l4(BasicBlockInv_Pool_constant_noBN, [1,1,1,1], numoutputs, 64, includesft=includesft)
-
-def NetConstant_noBN_16_n1_l4(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN_l4(BasicBlockInv_Pool_constant_noBN, [1,1,1,1], numoutputs, 16, includesft=includesft)
+def ResNetInvPreActDirect_Wider_Medium(numoutputs, dropoutrate):
+    return ResNetInvPreActDirect_Wider(BasicBlockInv_PreAct_Pool, BasicBlockInv_PreAct_Pool_constant, [1,6,2,1,1], numoutputs, dropoutrate, 16)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
                        starttrain, endtrain, startval, endval, version, schedulername, lossfunctionname, seed, is_debug,
-                       optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
+                       optimizername, weight_decay_sgd, modelfun_name, lr_patience,
                        summarystring, additionalsummary, savefilename):
     if not is_debug:
         torch.save({'epoch': epoch, 'model_state_dict': model_state_dict, 'optimizer_state_dict': optimizer_state_dict,
@@ -1138,7 +869,6 @@ def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict
                     'startval': startval, 'endval': endval, 'version': version, 'schedulername': schedulername,
                     'lossfunctionname': lossfunctionname, 'seed': seed, 'modelfun_name': modelfun_name,
                     'optimizername': optimizername, 'weight_decay_sgd': weight_decay_sgd, 'lr_patience': lr_patience,
-                    'includesft': includesft,
                     'summarystring': summarystring, 'additionalsummary': additionalsummary},
                    savelogdir + savefilename)
 

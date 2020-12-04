@@ -26,7 +26,7 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v5" #use only with "wider" model(s)! this is a modified version from v4-experimental-wide which can include ft
+version = "v4"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
@@ -52,10 +52,8 @@ parser.add_argument("--num_thresholds", default=100, type=int, choices=range(1,1
 
 parser.add_argument('--is_sgd', action='store_true')
 parser.add_argument('--reduce_lr_on_flat', action='store_true')
-parser.add_argument('--weight_decay_sgd', default=0.0, type=float) #weight decay for adam AND sgd (needs to be renamed)
+parser.add_argument('--weight_decay_sgd', default=0.0, type=float)
 parser.add_argument('--lr_patience', default=10, type=int)
-
-parser.add_argument('--includesft', action='store_true')
 
 args = parser.parse_args()
 print(args)
@@ -103,8 +101,6 @@ reduce_lr_on_flat = args.reduce_lr_on_flat
 weight_decay_sgd = args.weight_decay_sgd
 lr_patience = args.lr_patience
 
-includesft = args.includesft
-
 # Architecture
 numoutputs = 8 if is_new_save else checkpoint['numoutputs']
 
@@ -115,20 +111,18 @@ startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external valida
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
 train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds, includesft=includesft)
+                        "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
-                      "/mnt/Drive2/ivan_kevin/thresholds/files", includesft=includesft)
+                      "/mnt/Drive2/ivan_kevin/thresholds/files")
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
 #assert len(train_dataset) % batch_size == 0
 #assert len(val_dataset) % batch_size == 0
-print(len(train_generator))
-print(len(val_generator))
-time.sleep(10)
+
 if is_new_save:
     assert len(train_dataset) % batch_size == 0
     if len(val_dataset) % batch_size != 0:
@@ -144,12 +138,8 @@ if is_new_save:
 #torch.manual_seed(random_seed)
 #modelfun = ResNetInv2DeeperPool
 #modelfun = ResNetInvPreActDirect_Small
-#modelfun = ResNetInvPreActDirect_Medium
-#modelfun = PreActNetConstant_16_n1
-#modelfun = NetConstant_noBN_16_n1
-#modelfun = NetConstant_noBN_32_n1
-modelfun = NetConstant_noBN_64_n1_l4
-model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
+modelfun = ResNetInvPreActDirect_Medium
+model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
 #model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
@@ -158,17 +148,11 @@ modelfun_name = modelfun.__name__
 summarystring = repr(model)
 print(summarystring)
 
-if not includesft:
-    additionalsummary, _ = summary_string(model, (2,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
-else:
-    additionalsummary, _ = summary_string(model, (3, 129, 129, 129), device="cpu")
+additionalsummary, _ = summary_string(model, (2,128,128,128), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 print(additionalsummary)
 
 if is_new_save:
-    if not includesft:
-        writer.add_graph(model, Variable(torch.rand(1,2,129,129,129)))
-    else:
-        writer.add_graph(model, Variable(torch.rand(1, 3, 129, 129, 129)))
+    writer.add_graph(model, Variable(torch.rand(1,2,128,128,128)))
 ##### summaries #####
 ##########################################
 if not is_new_save:
@@ -177,12 +161,10 @@ model = model.to(device)
 
 #optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, eps=0.1)
 if not is_sgd:
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay_sgd)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 else:
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9,
                                 weight_decay=weight_decay_sgd, nesterov=True) #we use nesterov, CS231n recommendation
-    print("WARNING: you are using SGD")
-    time.sleep(20)
 
 optimizername = optimizer.__class__.__name__
 
@@ -276,7 +258,7 @@ if is_new_save:
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                 lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                 schedulername, lossfunctionname, seed, is_debug,
-                                optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
+                                optimizername, weight_decay_sgd, modelfun_name, lr_patience,
                                 summarystring, additionalsummary, '/bestval-model.pt')
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
@@ -285,7 +267,7 @@ if is_new_save:
                                total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                schedulername, lossfunctionname, seed, is_debug,
-                               optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
+                               optimizername, weight_decay_sgd, modelfun_name, lr_patience,
                                summarystring, additionalsummary, '/epoch' + str(epoch) + '.pt')
             lastsavetime = time.time()
             print(">>> Saved!")
