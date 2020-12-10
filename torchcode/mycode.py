@@ -1769,8 +1769,8 @@ def NetConstant_64_n2_l4_noglobalpool(numoutputs, dropoutrate, includesft):
 def NetConstant_noBN_64_n4_l4(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
     return NetConstant_noBN_l4(BasicBlockInv_Pool_constant_noBN_n4, [1,1,1,1], numoutputs, 64, includesft=includesft)
 
-def NetConstant_IN_deeptail(numoutputs,dropoutrate,includesft):
-    return NetConstant_noBN_l4_extended(BasicBlockInv_Pool_constant_n4_inorm, [1,1,2,2], numoutputs, 64, includesft=includesft)
+def NetConstant_IN_normtail(numoutputs,dropoutrate,includesft):
+    return NetConstant_noBN_l4_extended(BasicBlockInv_Pool_constant_n4_inorm, [2,2,2,2], numoutputs, 64, includesft=includesft)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
