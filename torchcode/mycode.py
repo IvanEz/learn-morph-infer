@@ -528,39 +528,26 @@ class BasicBlockInv_Pool_constant_n4_inorm(torch.nn.Module):
         if self.downsample:
             self.maxpool1 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
 
-        if self.normalize==False:
-            #self.bn1 = torch.nn.BatchNorm3d(inplanes)
-            self.conv1 = conv3x3_biased(inplanes, inplanes)
-            self.relu1 = torch.nn.ReLU()
+        #self.bn1 = torch.nn.BatchNorm3d(inplanes)
+        self.conv1 = conv3x3_biased(inplanes, inplanes)
+        self.relu1 = torch.nn.ReLU()
 
-            #self.bn2 = torch.nn.BatchNorm3d(inplanes)
-            self.conv2 = conv3x3_biased(inplanes, inplanes)
-            self.relu2 = torch.nn.ReLU()
+        #self.bn2 = torch.nn.BatchNorm3d(inplanes)
+        self.conv2 = conv3x3_biased(inplanes, inplanes)
+        self.relu2 = torch.nn.ReLU()
 
-            self.conv3 = conv3x3_biased(inplanes, inplanes)
-            self.relu3 = torch.nn.ReLU()
+        self.conv3 = conv3x3_biased(inplanes, inplanes)
+        self.relu3 = torch.nn.ReLU()
 
-            self.conv4 = conv3x3_biased(inplanes, inplanes)
-            self.relu4 = torch.nn.ReLU()
-        else:
+        self.conv4 = conv3x3_biased(inplanes, inplanes)
+        self.relu4 = torch.nn.ReLU()
+
+        if self.normalize:
             self.norm0 = torch.nn.InstanceNorm3d(inplanes)
-
-            self.conv1 = conv3x3(inplanes, inplanes)
             self.norm1 = torch.nn.InstanceNorm3d(inplanes)
-            self.relu1 = torch.nn.ReLU()
-
-            # self.bn2 = torch.nn.BatchNorm3d(inplanes)
-            self.conv2 = conv3x3(inplanes, inplanes)
             self.norm2 = torch.nn.InstanceNorm3d(inplanes)
-            self.relu2 = torch.nn.ReLU()
-
-            self.conv3 = conv3x3(inplanes, inplanes)
             self.norm3 = torch.nn.InstanceNorm3d(inplanes)
-            self.relu3 = torch.nn.ReLU()
-
-            self.conv4 = conv3x3(inplanes, inplanes)
             self.norm4 = torch.nn.InstanceNorm3d(inplanes)
-            self.relu4 = torch.nn.ReLU()
 
 
     def forward(self, x):
@@ -1674,9 +1661,9 @@ class NetConstant_noBN_l4_extended(torch.nn.Module): #HERE INCLUDESFT IS DIFFERE
                 #torch.nn.init.constant_(m.weight, 1)
                 #torch.nn.init.constant_(m.bias, 0)
                 raise Exception("no batchnorm")
-            elif isinstance(m, torch.nn.InstanceNorm3d):
-                torch.nn.init.constant_(m.weight, 1)
-                torch.nn.init.constant_(m.bias, 0)
+            #elif isinstance(m, torch.nn.InstanceNorm3d):
+            #    torch.nn.init.constant_(m.weight, 1)
+            #    torch.nn.init.constant_(m.bias, 0)
             # elif isinstance(m, torch.nn.Linear):
             #    print("initializing linear")
             #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
@@ -1685,7 +1672,7 @@ class NetConstant_noBN_l4_extended(torch.nn.Module): #HERE INCLUDESFT IS DIFFERE
         layers = []
         layers.append(block(self.inplanes, downsample, normalize))
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, normalize))
+            layers.append(block(self.inplanes, False, normalize))
 
         return torch.nn.Sequential(*layers)
 
