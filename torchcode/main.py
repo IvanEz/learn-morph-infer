@@ -148,8 +148,15 @@ if is_new_save:
 #modelfun = PreActNetConstant_16_n1
 #modelfun = NetConstant_noBN_16_n1
 #modelfun = NetConstant_noBN_32_n1
-modelfun = NetConstant_noBN_64_n1_l4
+#modelfun = NetConstant_noBN_16_n1_l4_TWONET
+#modelfun = NetConstant_noBN_16_n1_l4_TWONET_fc
+#modelfun = NetConstant_noBN_32_n2_l4
+
+#modelfun = NetConstant_noBN_16_n1_l4
+#modelfun = NetConstant_64_n2_l4_noglobalpool
+modelfun = NetConstant_noBN_64_n4_l4
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
+#model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
 #model = ResNetInv2Deeper(numoutputs=numoutputs, dropoutrate=dropoutrate)
 #model = ConvNet(numoutputs=numoutputs, dropoutrate=dropoutrate)
