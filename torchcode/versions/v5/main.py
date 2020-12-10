@@ -26,8 +26,8 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v6" #older models may not work with this version if you use "--includeft" which here means ONLY FT INPUT
-#THIS VERSION IS CURRENTLY BEING TESTED! IS STILL EXPERIMENTAL! USE V5 TO TRAIN RIGHT NOW RELIABLY
+version = "v5" #use only with "wider" model(s)! this is a modified version from v4-experimental-wide which can include ft
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
 parser.add_argument('--isnewsave', action='store_true') #--isnewsave -> training, if not there: inference
@@ -57,12 +57,6 @@ parser.add_argument('--lr_patience', default=10, type=int)
 
 parser.add_argument('--includesft', action='store_true')
 
-parser.add_argument('--outputmode', default=0, type=int)
-#outputmode defines the outputs of the network
-#0: uth1, uth2, lambda, mu, v, x, y, z (as is in latest versions)
-#1: lambda,mu,v
-#2: x,y,z
-#3: lambda, mu
 args = parser.parse_args()
 print(args)
 
@@ -111,24 +105,9 @@ lr_patience = args.lr_patience
 
 includesft = args.includesft
 
-if is_new_save:
-    outputmode = args.outputmode
-else:
-    outputmode = checkpoint['outputmode']
-print(f"OUTPUT MODE: {outputmode}")
 # Architecture
-#numoutputs = 8 if is_new_save else checkpoint['numoutputs']
-if is_new_save:
-    if outputmode == 0:
-        numoutputs = 8
-    elif outputmode == 1 or outputmode == 2:
-        numoutputs = 3
-    elif outputmode == 3:
-        numoutputs = 2
-    else:
-        raise Exception("invalid output mode")
-else:
-    numoutputs = checkpoint['numoutputs']
+numoutputs = 8 if is_new_save else checkpoint['numoutputs']
+
 
 starttrain = args.starttrain
 endtrain = args.endtrain #6400 / 16000 / 32000 / 64000 / 80000
@@ -136,13 +115,12 @@ startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external valida
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
 train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds, includesft=includesft,
-                         outputmode=outputmode)
+                        "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds, includesft=includesft)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
-                      "/mnt/Drive2/ivan_kevin/thresholds/files", includesft=includesft, outputmode=outputmode)
+                      "/mnt/Drive2/ivan_kevin/thresholds/files", includesft=includesft)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
@@ -176,8 +154,7 @@ if is_new_save:
 
 #modelfun = NetConstant_noBN_16_n1_l4
 #modelfun = NetConstant_64_n2_l4_noglobalpool
-#modelfun = NetConstant_noBN_64_n4_l4
-modelfun = NetConstant_IN_normtail
+modelfun = NetConstant_noBN_64_n4_l4
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 #model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
@@ -191,14 +168,14 @@ print(summarystring)
 if not includesft:
     additionalsummary, _ = summary_string(model, (2,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 else:
-    additionalsummary, _ = summary_string(model, (1, 129, 129, 129), device="cpu")
+    additionalsummary, _ = summary_string(model, (3, 129, 129, 129), device="cpu")
 print(additionalsummary)
 
 if is_new_save:
     if not includesft:
         writer.add_graph(model, Variable(torch.rand(1,2,129,129,129)))
     else:
-        writer.add_graph(model, Variable(torch.rand(1, 1, 129, 129, 129)))
+        writer.add_graph(model, Variable(torch.rand(1, 3, 129, 129, 129)))
 ##### summaries #####
 ##########################################
 if not is_new_save:
@@ -306,8 +283,7 @@ if is_new_save:
                                 total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                 lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                 schedulername, lossfunctionname, seed, is_debug,
-                                optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft, outputmode,
-                                str(args),
+                                optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
                                 summarystring, additionalsummary, '/bestval-model.pt')
             print(">>> Saving new model with new best val loss " + str(best_val_loss))
 
@@ -316,8 +292,7 @@ if is_new_save:
                                total_train_loss, dropoutrate, batch_size, numoutputs, learning_rate,
                                lr_scheduler_rate, starttrain, endtrain, startval, endval, version,
                                schedulername, lossfunctionname, seed, is_debug,
-                               optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft, outputmode,
-                               str(args),
+                               optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
                                summarystring, additionalsummary, '/epoch' + str(epoch) + '.pt')
             lastsavetime = time.time()
             print(">>> Saved!")
@@ -395,7 +370,7 @@ else:
 
             plt.figure()
             plt.hist(losses, bins=100, range=(0.0, 1.0))
-            plt.title(loaddir + ": \n " + str(outputfeature) + " - outputmode: " + str(outputmode))
+            plt.title(loaddir + ": \n " + str(outputfeature))
             plt.savefig("fig" + str(outputfeature) + ".png")
 
         #print("Error based on normalization range [-1.0, 1.0]! If error output here is e.g. 0.05 --> error is 2.5% !")
@@ -406,7 +381,7 @@ else:
         # (Low: The mean error reported above for that feature is roughly that )
         print("##########################################")
 
-        np.savez_compressed("results_" + str(outputmode) + ".npz", losses=lossmatrix, ys = ys, yspredicted = yspredicted) #still in normalization range [-1,1] !
+        np.savez_compressed("results.npz", losses=lossmatrix, ys = ys, yspredicted = yspredicted) #still in normalization range [-1,1] !
 
 
         print("############# RANGED ERROR ##################")
@@ -437,17 +412,10 @@ else:
         '''
         #####################################################################################
 
-        if outputmode == 0:
-            ranged_error("lambda", 2, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max], loaddir)
-            ranged_error("mu", 3, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
-            ranged_error("v", 4, [2*np.sqrt(4e-7), 2*np.sqrt(0.003)], ys, yspredicted, [velocity_min, velocity_max], loaddir)
-        elif outputmode == 1:
-            ranged_error("lambda", 0, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max],
-                         loaddir)
-            ranged_error("mu", 1, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
-            ranged_error("v", 2, [2 * np.sqrt(4e-7), 2 * np.sqrt(0.003)], ys, yspredicted, [velocity_min, velocity_max], loaddir)
-        elif outputmode == 3:
-            ranged_error("lambda", 0, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max], loaddir)
-            ranged_error("mu", 1, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
+        ranged_error("lambda", 2, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max], loaddir)
+        ranged_error("mu", 3, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
+        ranged_error("v", 4, [2*np.sqrt(4e-7), 2*np.sqrt(0.003)], ys, yspredicted, [velocity_min, velocity_max], loaddir)
+
+
         print("############# RANGED ERROR ##################")
 

@@ -88,10 +88,10 @@ class Dataset2(Dataset):
     # We remove tanh from last layer when predicting infiltration length + Tp + velocity, because mean of Dw and p
     # after bringing into range [-1, 1] was at 0. Since we now predict products of these factors, we can observe
     # our data and see that when we normalize into [-1, 1] range, the mean (of our TRAINING DATA) is not at 0 anymore!
-    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100, includesft=False, outputmode=0):
+    # --> this is done in NL architecture!
+    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100, includesft=False):
         Dataset.__init__(self, datapath, beginning, ending, thrpath, num_thresholds=num_thresholds)
         self.includesft = includesft
-        self.outputmode = outputmode
 
     def __len__(self):
         return self.datasetsize
@@ -136,14 +136,14 @@ class Dataset2(Dataset):
             if self.includesft:
                 ft = np.abs(np.fft.fftshift(np.fft.fftn(thr_volume + pet_volume, norm='ortho')))
                 ft_reshaped = np.expand_dims((ft / np.max(ft)), -1)
-                #nn_input = np.concatenate((nn_input, ft_reshaped), -1)
-                nn_input = ft_reshaped  # OVERWRITES NN_INPUT, IS NOW ONLY FOURIER TRANSFORM, NOT SPATIAL TUMOR!
+                nn_input = np.concatenate((nn_input, ft_reshaped), -1)
                 if index == 0:
-                    print("Shape is " + str(nn_input.shape) + ", should be (129,129,129,1)")
+                    print("Shape is " + str(nn_input.shape) + ", should be (129,129,129,3)")
 
         with open(file_path + "parameter_tag2.pkl", "rb") as par:
             # TODO: interpolate with manual formulas (e.g. uth: 10x - 7)
             # TODO: rounding to 6 digits?
+            paramsarray = np.zeros(8)
             params = pickle.load(par)
 
             Dw = params['Dw'] #cm^2 / d
@@ -154,32 +154,14 @@ class Dataset2(Dataset):
             mu = Tend * rho #constant
             velocity = 2 * np.sqrt(Dw * rho) #cm / d
 
-            if self.outputmode == 0:
-                paramsarray = np.zeros(8)
-                paramsarray[0] = np.interp(t1gd_thr, [0.5, 0.85], normalization_range)
-                paramsarray[1] = np.interp(flair_thr, [0.05, 0.5], normalization_range)
-                paramsarray[2] = np.interp(lambdaw, [np.sqrt(0.001), np.sqrt(7.5)], normalization_range)
-                paramsarray[3] = np.interp(mu, [0.1, 300.0], normalization_range)
-                paramsarray[4] = np.interp(velocity, [2*np.sqrt(4e-7), 2*np.sqrt(0.003)], normalization_range)
-                paramsarray[5] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
-                paramsarray[6] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
-                paramsarray[7] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
-            elif self.outputmode == 1:
-                paramsarray = np.zeros(3)
-                paramsarray[0] = np.interp(lambdaw, [np.sqrt(0.001), np.sqrt(7.5)], normalization_range)
-                paramsarray[1] = np.interp(mu, [0.1, 300.0], normalization_range)
-                paramsarray[2] = np.interp(velocity, [2 * np.sqrt(4e-7), 2 * np.sqrt(0.003)], normalization_range)
-            elif self.outputmode == 2:
-                paramsarray = np.zeros(3)
-                paramsarray[0] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
-                paramsarray[1] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
-                paramsarray[2] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
-            elif self.outputmode == 3:
-                paramsarray = np.zeros(2)
-                paramsarray[0] = np.interp(lambdaw, [np.sqrt(0.001), np.sqrt(7.5)], normalization_range)
-                paramsarray[1] = np.interp(mu, [0.1, 300.0], normalization_range)
-            else:
-                raise Exception("invalid output mode")
+            paramsarray[0] = np.interp(t1gd_thr, [0.5, 0.85], normalization_range)
+            paramsarray[1] = np.interp(flair_thr, [0.05, 0.5], normalization_range)
+            paramsarray[2] = np.interp(lambdaw, [np.sqrt(0.001), np.sqrt(7.5)], normalization_range)
+            paramsarray[3] = np.interp(mu, [0.1, 300.0], normalization_range)
+            paramsarray[4] = np.interp(velocity, [2*np.sqrt(4e-7), 2*np.sqrt(0.003)], normalization_range)
+            paramsarray[5] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
+            paramsarray[6] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
+            paramsarray[7] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
 
             '''
             paramsarray[0] = np.interp(t1gd_thr, [0.5, 0.85], normalization_range)
@@ -1695,8 +1677,8 @@ class NetConstant_noBN_l4_extended(torch.nn.Module): #HERE INCLUDESFT IS DIFFERE
         return torch.nn.Sequential(*layers)
 
     def forward(self, x):
-        #if self.includesft:
-        #    x = torch.chunk(x,2,dim=1)[1] #chunks [binary, pet, fourier] --> [binary,pet], [fourier] and takes fourier
+        if self.includesft:
+            x = torch.chunk(x,2,dim=1)[1] #chunks [binary, pet, fourier] --> [binary,pet], [fourier] and takes fourier
 
         x = self.conv1(x)
         x = self.relu1(x)
@@ -1793,8 +1775,7 @@ def NetConstant_IN_normtail(numoutputs,dropoutrate,includesft):
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,
                        starttrain, endtrain, startval, endval, version, schedulername, lossfunctionname, seed, is_debug,
-                       optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft, outputmode,
-                       passedarguments,
+                       optimizername, weight_decay_sgd, modelfun_name, lr_patience, includesft,
                        summarystring, additionalsummary, savefilename):
     if not is_debug:
         torch.save({'epoch': epoch, 'model_state_dict': model_state_dict, 'optimizer_state_dict': optimizer_state_dict,
@@ -1804,7 +1785,7 @@ def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict
                     'startval': startval, 'endval': endval, 'version': version, 'schedulername': schedulername,
                     'lossfunctionname': lossfunctionname, 'seed': seed, 'modelfun_name': modelfun_name,
                     'optimizername': optimizername, 'weight_decay_sgd': weight_decay_sgd, 'lr_patience': lr_patience,
-                    'includesft': includesft, 'outputmode': outputmode, 'passedarguments': passedarguments,
+                    'includesft': includesft,
                     'summarystring': summarystring, 'additionalsummary': additionalsummary},
                    savelogdir + savefilename)
 
