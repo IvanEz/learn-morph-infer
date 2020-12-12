@@ -177,7 +177,8 @@ if is_new_save:
 #modelfun = NetConstant_noBN_16_n1_l4
 #modelfun = NetConstant_64_n2_l4_noglobalpool
 #modelfun = NetConstant_noBN_64_n4_l4
-modelfun = NetConstant_IN_normtail
+#modelfun = NetConstant_IN_normtail
+modelfun = NetConstant_IN_norm
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 #model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
