@@ -548,17 +548,17 @@ class BasicBlockInv_Pool_constant_n4_inorm(torch.nn.Module):
 
         #self.bn1 = torch.nn.BatchNorm3d(inplanes)
         self.conv1 = conv3x3_biased(inplanes, inplanes)
-        self.relu1 = torch.nn.ReLU()
+        self.relu1 = torch.nn.ReLU(inplace=True)
 
         #self.bn2 = torch.nn.BatchNorm3d(inplanes)
         self.conv2 = conv3x3_biased(inplanes, inplanes)
-        self.relu2 = torch.nn.ReLU()
+        self.relu2 = torch.nn.ReLU(inplace=True)
 
         self.conv3 = conv3x3_biased(inplanes, inplanes)
-        self.relu3 = torch.nn.ReLU()
+        self.relu3 = torch.nn.ReLU(inplace=True)
 
         self.conv4 = conv3x3_biased(inplanes, inplanes)
-        self.relu4 = torch.nn.ReLU()
+        self.relu4 = torch.nn.ReLU(inplace=True)
 
         if self.normalize:
             self.norm0 = torch.nn.InstanceNorm3d(inplanes)
