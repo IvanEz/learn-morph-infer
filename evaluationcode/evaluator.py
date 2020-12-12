@@ -17,6 +17,9 @@ normalization_range = [-1.0, 1.0]
 # thresholds = [0.001, 0.005, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
 thresholds = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.25, 0.4, 0.5, 0.75, 0.8, 0.9, 0.95]
 
+def assertrange(Dw,rho,Tend):
+    if not ((Dw >= 0.0002 and Dw <= 0.015) and (rho >= 0.002 and rho <= 0.2) and (Tend >= 50 and Tend <= 1500)):
+        print("LIGHT WARNING: parameter(s) out of generated range")
 
 # if one of the predicted parameters is out of range, numpy interpolate automatically brings it to border
 def convert(l, m, v, x, y, z):
@@ -61,6 +64,7 @@ parser.add_argument('--end', default=88000, type=int)
 parser.add_argument('--parapid', default=0, type=int)
 parser.add_argument('--isdebug', action='store_true')
 parser.add_argument('--visualize', action='store_true')
+parser.add_argument('--constantv', action='store_true')
 args = parser.parse_args()
 
 print(args)
@@ -69,6 +73,7 @@ end = args.end
 parapid = args.parapid
 isdebug = args.isdebug
 visualize = args.visualize
+constantv = args.constantv
 print(f"start: {start}, end: {end}")
 diceresults = []
 
@@ -78,6 +83,11 @@ if visualize:
 
     time.sleep(8)
 
+if constantv:
+    print("WARNING: will use fixed constant velocity to infer parameters!")
+    time.sleep(15)
+
+#TODO: currently only works with val set, code needs to be modified to work with separate test set!
 with np.load("results.npz") as results:
     start_index = start - 80000
     end_index = end - 80000
@@ -85,12 +95,17 @@ with np.load("results.npz") as results:
     assert end_index >= 0 and end_index <= 20000
     assert start_index < end_index
 
-    ys = results['ys'][start_index: end_index, :]
-    yspredicted = results['yspredicted'][start_index: end_index, :]
+    ys = results['ys'][start_index : end_index, :]
+    yspredicted = results['yspredicted'][start_index : end_index, :]
 
 datapath = "/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/"
+thrpath = "/mnt/Drive2/ivan_kevin/thresholds/files"
 
-all_paths = sorted(glob("{}/*/".format(datapath)))[start: end]
+all_paths = sorted(glob("{}/*/".format(datapath)))[start : end]
+thr_paths = sorted(glob("{}/*".format(thrpath)))[start : end]
+
+assert len(all_paths) == len(thr_paths)
+print(len(all_paths))
 
 for i in range(0, len(all_paths)):
     print(i)
@@ -109,8 +124,12 @@ for i in range(0, len(all_paths)):
     gt_inrange_innpz = convert(y[2], y[3], y[4], y[5], y[6], y[7])
 
     if not isdebug:
-        predicted_inrange = convert(ypredicted[2], ypredicted[3], ypredicted[4], ypredicted[5], ypredicted[6],
-                                    ypredicted[7])
+        if not constantv:
+            predicted_inrange = convert(ypredicted[2], ypredicted[3], ypredicted[4], ypredicted[5], ypredicted[6],
+                                        ypredicted[7])
+        else:
+            predicted_inrange = convert(ypredicted[2], ypredicted[3], 0.0, ypredicted[5], ypredicted[6],
+                                        ypredicted[7])
     else:
         print("WARNING: you are in debug mode! RESULTS WILL HAVE PERFECT SCORE!")
         time.sleep(15)
@@ -118,7 +137,7 @@ for i in range(0, len(all_paths)):
 
     print(f"GROUND TRUTH: {gt_inrange_inpkl}")
     print(f"GROUND TRUTH in results.npz: {gt_inrange_innpz}")
-    print(f"PREDICTED: {predicted_inrange}")
+    print(f"PREDICTED: {predicted_inrange} with constantv = {constantv}")
 
     Dw = predicted_inrange[0]
     rho = predicted_inrange[1]
@@ -126,6 +145,8 @@ for i in range(0, len(all_paths)):
     icx = predicted_inrange[3]
     icy = predicted_inrange[4]
     icz = predicted_inrange[5]
+
+    assertrange(Dw,rho,Tend)
 
     command = "./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw " + str(
         Dw) + " -rho " + str(rho) + " -Tend " + str(Tend) + " -dumpfreq " + str(0.9999 * Tend) + " -icx " + str(
@@ -150,6 +171,18 @@ for i in range(0, len(all_paths)):
     print(dicescores)
 
     if visualize:
+        thr_path = thr_paths[i]
+        print(f"thr_path: {thr_path}")
+        with np.load(thr_path) as thresholdsfile:
+            t1gd_thr = thresholdsfile['t1gd'][0]
+            flair_thr = thresholdsfile['flair'][0]
+
+        print(f"t1gd_thr: {t1gd_thr}, flair_thr: {flair_thr}")
+        t1gd_volume = (gt_tumor >= t1gd_thr).astype(float)
+        flair_volume = (gt_tumor >= flair_thr).astype(float)
+        thresholded_volume = 0.666 * t1gd_volume + 0.333 * flair_volume
+        pet_volume = ((gt_tumor >= t1gd_thr) * gt_tumor) / 0.5
+
         f = mlab.figure()
         mlab.volume_slice(gt_tumor, figure=f)
         mlab.title("gt", figure=f)
@@ -159,6 +192,12 @@ for i in range(0, len(all_paths)):
         f = mlab.figure()
         mlab.volume_slice(sim_tumor_brain, figure=f)
         mlab.title("sim_brain", figure=f)
+        f = mlab.figure()
+        mlab.volume_slice(thresholded_volume, figure=f)
+        mlab.title("thr_volume", figure=f)
+        f = mlab.figure()
+        mlab.volume_slice(pet_volume, figure=f)
+        mlab.title("pet_volume", figure=f)
         mlab.show()
 
     diceresults.append([(start + i), gt_inrange_inpkl, dicescores])
