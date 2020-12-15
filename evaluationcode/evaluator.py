@@ -65,6 +65,8 @@ parser.add_argument('--parapid', default=0, type=int)
 parser.add_argument('--isdebug', action='store_true')
 parser.add_argument('--visualize', action='store_true')
 parser.add_argument('--constantv', action='store_true')
+parser.add_argument('--randomv', action='store_true')
+parser.add_argument("--seed", default=123, type=int)
 args = parser.parse_args()
 
 print(args)
@@ -74,6 +76,8 @@ parapid = args.parapid
 isdebug = args.isdebug
 visualize = args.visualize
 constantv = args.constantv
+randomv = args.randomv
+seed = args.seed
 print(f"start: {start}, end: {end}")
 diceresults = []
 
@@ -86,6 +90,15 @@ if visualize:
 if constantv:
     print("WARNING: will use fixed constant velocity to infer parameters!")
     time.sleep(15)
+
+if randomv:
+    print("WARNING: will use random velocity to infer parameters")
+    npseed = seed + parapid
+    np.random.seed(npseed)
+    print(f"Seeded random num generator with {npseed}")
+    time.sleep(15)
+
+assert not (constantv and randomv) #need to choose between the two
 
 #TODO: currently only works with val set, code needs to be modified to work with separate test set!
 with np.load("results.npz") as results:
@@ -125,9 +138,16 @@ for i in range(0, len(all_paths)):
 
     if not isdebug:
         if not constantv:
-            predicted_inrange = convert(ypredicted[2], ypredicted[3], ypredicted[4], ypredicted[5], ypredicted[6],
-                                        ypredicted[7])
-        else:
+            if not randomv:
+                predicted_inrange = convert(ypredicted[2], ypredicted[3], ypredicted[4], ypredicted[5], ypredicted[6],
+                                            ypredicted[7])
+            else: #randomv
+                v_random = np.interp(np.random.rand(), [0.0, 1.0], normalization_range)
+                predicted_inrange = convert(ypredicted[2], ypredicted[3], v_random, ypredicted[5], ypredicted[6],
+                                            ypredicted[7])
+                print(f"v_random: {v_random}")
+
+        else: #constantv
             predicted_inrange = convert(ypredicted[2], ypredicted[3], 0.0, ypredicted[5], ypredicted[6],
                                         ypredicted[7])
     else:

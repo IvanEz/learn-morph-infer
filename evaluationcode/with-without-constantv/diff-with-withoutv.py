@@ -34,5 +34,6 @@ for i in range(0, len(allresults0)): #tumor i
             dice_differences.append(dice_diff)
 
 print(f"max diff: {np.max(dice_differences)}")
+print(len(dice_differences))
 plt.hist(dice_differences, bins=50)
 plt.show()
