@@ -88,13 +88,10 @@ class Dataset2(Dataset):
     # We remove tanh from last layer when predicting infiltration length + Tp + velocity, because mean of Dw and p
     # after bringing into range [-1, 1] was at 0. Since we now predict products of these factors, we can observe
     # our data and see that when we normalize into [-1, 1] range, the mean (of our TRAINING DATA) is not at 0 anymore!
-    def __init__(self, datapath, beginning, ending, thrpath, necroticpath, num_thresholds=100, includesft=False, outputmode=0):
+    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100, includesft=False, outputmode=0):
         Dataset.__init__(self, datapath, beginning, ending, thrpath, num_thresholds=num_thresholds)
         self.includesft = includesft
         self.outputmode = outputmode
-        self.necroticpath = necroticpath
-        self.necrotic_paths = sorted(glob("{}/*".format(self.necroticpath)))[self.beginning : self.ending]
-        assert len(self.necrotic_paths) == self.datasetsize
 
     def __len__(self):
         return self.datasetsize
@@ -102,17 +99,11 @@ class Dataset2(Dataset):
     def __getitem__(self, index):
         file_path = self.all_paths[index]
         thr_path = self.threshold_paths[index]
-        necrotic_path = self.necrotic_paths[index]
 
         with np.load(thr_path) as thresholdsfile:
             t1gd_thr = thresholdsfile['t1gd'][self.epoch % self.num_thresholds]
             flair_thr = thresholdsfile['flair'][self.epoch % self.num_thresholds]
-            assert t1gd_thr >= 0.5 and t1gd_thr <= 0.85
-            assert flair_thr >= 0.05 and flair_thr <= 0.5
 
-        with np.load(necrotic_path) as necroticfile:
-            necrotic_thr = necroticfile['necrotic'][self.epoch % self.num_thresholds]
-            assert necrotic_thr >= 0.95 and necrotic_thr <= 1.0
         # print("got pos " + str(index) + " which corresponds to " + str(file_path))
         with np.load(file_path + "Data_0001_thr2.npz") as data:
             # thrvolume = data['thr2_data']
@@ -132,11 +123,9 @@ class Dataset2(Dataset):
             thrvolume_resized = np.expand_dims(thr_volume, -1)  # now it is 129x129x129x1
             #print(thrvolume_resized.shape)
 
-            #b = 0.5
+            b = 0.5
 
-            pet_volume = ((volume_resized >= t1gd_thr) * volume_resized)
-            pet_volume = (pet_volume <= necrotic_thr) * pet_volume
-            pet_volume = pet_volume / pet_volume.max()
+            pet_volume = ((volume_resized >= t1gd_thr) * volume_resized) / b
             #print(pet_volume.shape)
             pet_volume_reshaped = np.expand_dims(pet_volume, -1) #now 129x129x129x1
             #print(pet_volume_reshaped.shape)
@@ -145,15 +134,12 @@ class Dataset2(Dataset):
             #print(nn_input.shape)
 
             if self.includesft:
-                '''
                 ft = np.abs(np.fft.fftshift(np.fft.fftn(thr_volume + pet_volume, norm='ortho')))
                 ft_reshaped = np.expand_dims((ft / np.max(ft)), -1)
                 #nn_input = np.concatenate((nn_input, ft_reshaped), -1)
                 nn_input = ft_reshaped  # OVERWRITES NN_INPUT, IS NOW ONLY FOURIER TRANSFORM, NOT SPATIAL TUMOR!
                 if index == 0:
                     print("Shape is " + str(nn_input.shape) + ", should be (129,129,129,1)")
-                '''
-                raise Exception("no support for ft in this version")
 
         with open(file_path + "parameter_tag2.pkl", "rb") as par:
             # TODO: interpolate with manual formulas (e.g. uth: 10x - 7)

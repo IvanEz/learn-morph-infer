@@ -26,8 +26,8 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v7" #older models may not work with this version if you use "--includeft" which here means ONLY FT INPUT
-#includes necrotic core
+version = "v6" #older models may not work with this version if you use "--includeft" which here means ONLY FT INPUT
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
 parser.add_argument('--isnewsave', action='store_true') #--isnewsave -> training, if not there: inference
@@ -136,15 +136,13 @@ startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external valida
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
 train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
-                         num_thresholds=num_thresholds, includesft=includesft,
+                        "/mnt/Drive2/ivan_kevin/thresholds/files", num_thresholds=num_thresholds, includesft=includesft,
                          outputmode=outputmode)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
-                      "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
-                       includesft=includesft, outputmode=outputmode)
+                      "/mnt/Drive2/ivan_kevin/thresholds/files", includesft=includesft, outputmode=outputmode)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
