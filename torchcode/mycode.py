@@ -1876,6 +1876,7 @@ class inorm_net(torch.nn.Module): #conv1,2,3,4 here are similar to densenet
         else:
             self.inplanes = 1  # INPUT IS ONLY FOURIER TRANSFORM
         '''
+        self.inplanes = 2
 
         self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=False)
         self.norm1 = torch.nn.InstanceNorm3d(channels,affine=True)
