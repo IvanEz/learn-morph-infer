@@ -627,14 +627,14 @@ class inorm_block(torch.nn.Module): #does not begin with instancenorming, affine
         #self.downsample = downsample
         #if self.downsample:
         #    self.maxpool1 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-
+        assert self.normalize == True
         #self.bn1 = torch.nn.BatchNorm3d(inplanes)
+        self.relu1 = torch.nn.ReLU()
         self.conv1 = conv3x3(inplanes, inplanes)
-        self.relu1 = torch.nn.ReLU(inplace=True)
 
         #self.bn2 = torch.nn.BatchNorm3d(inplanes)
-        self.conv2 = conv3x3(inplanes, inplanes)
         self.relu2 = torch.nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(inplanes, inplanes)
 
         if self.normalize:
             #self.norm0 = torch.nn.InstanceNorm3d(inplanes)
@@ -646,21 +646,16 @@ class inorm_block(torch.nn.Module): #does not begin with instancenorming, affine
 
         #if self.downsample:
         #    x = self.maxpool1(x)
-        #if self.normalize:
-        #    x = self.norm0(x)
 
-        out = self.conv1(x)
-        if self.normalize:
-            out = self.norm1(out)
-        out = self.relu1(out)
+        out = self.relu1(x)
+        out = self.conv1(out)
+        out = self.norm1(out)
 
-        out = self.conv2(out)
-        if self.normalize:
-            out = self.norm2(out)
         out = self.relu2(out)
+        out = self.conv2(out)
+        out = self.norm2(out)
 
         out = out + x
-        #out += x
 
         return out
 
@@ -1878,34 +1873,34 @@ class inorm_net(torch.nn.Module): #conv1,2,3,4 here are similar to densenet
         '''
         self.inplanes = 2
 
-        self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=False)
-        self.norm1 = torch.nn.InstanceNorm3d(channels,affine=True)
-        self.relu1 = torch.nn.ReLU(inplace=True)
+        self.conv1_i = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=False)
+        self.norm1_i = torch.nn.InstanceNorm3d(channels,affine=True)
+        #self.relu1 = torch.nn.ReLU(inplace=True)
         self.inplanes = channels
 
         self.layer1 = self._make_layer(block, layers[0], normalize=True)
 
         self.maxpool1 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-        self.conv2 = conv3x3(self.inplanes, 2 * self.inplanes)
-        self.inplanes = 2 * self.inplanes
-        self.norm2 = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
-        self.relu2 = torch.nn.ReLU(inplace=True)
+        #self.conv2_2 = torch.nn.Conv3d(self.inplanes, self.inplanes, kernel_size=3, stride=2, padding=1, bias=False)
+        #self.inplanes = 2 * self.inplanes
+        self.norm2_i = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
+        #self.relu2_i = torch.nn.ReLU(inplace=True)
 
         self.layer2 = self._make_layer(block, layers[1], normalize=True)
 
         self.maxpool2 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-        self.conv3 = conv3x3(self.inplanes, 2 * self.inplanes)
-        self.inplanes = 2 * self.inplanes
-        self.norm3 = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
-        self.relu3 = torch.nn.ReLU(inplace=True)
+        #self.conv3 = torch.nn.Conv3d(self.inplanes, self.inplanes, kernel_size=3, stride=2, padding=1, bias=False)
+        #self.inplanes = 2 * self.inplanes
+        self.norm3_i = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
+        #self.relu3_i = torch.nn.ReLU(inplace=True)
 
         self.layer3 = self._make_layer(block, layers[2], normalize=True)
 
         self.maxpool3 = torch.nn.MaxPool3d(kernel_size=2, stride=2)
-        self.conv4 = conv3x3(self.inplanes, 2 * self.inplanes)
-        self.inplanes = 2 * self.inplanes
-        self.norm4 = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
-        self.relu4 = torch.nn.ReLU(inplace=True)
+        #self.conv4 = torch.nn.Conv3d(self.inplanes, self.inplanes, kernel_size=3, stride=2, padding=1, bias=False)
+        #self.inplanes = 2 * self.inplanes
+        self.norm4_i = torch.nn.InstanceNorm3d(self.inplanes, affine=True)
+        #self.relu4_i = torch.nn.ReLU(inplace=True)
 
         self.layer4 = self._make_layer(block, layers[3], normalize=True)
         #self.layer5 = self._make_layer(block, layers[4])
@@ -1914,7 +1909,7 @@ class inorm_net(torch.nn.Module): #conv1,2,3,4 here are similar to densenet
         #self.relu_final = torch.nn.ReLU()
         self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
         #self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
+        self.fc = torch.nn.Linear(self.inplanes, numoutputs)
         #self.tanh = torch.nn.Tanh()
 
         # TODO: try 'fan_out' init
@@ -1925,9 +1920,9 @@ class inorm_net(torch.nn.Module): #conv1,2,3,4 here are similar to densenet
                 #torch.nn.init.constant_(m.weight, 1)
                 #torch.nn.init.constant_(m.bias, 0)
                 raise Exception("no batchnorm")
-            elif isinstance(m, torch.nn.InstanceNorm3d):
-                torch.nn.init.constant_(m.weight, 1)
-                torch.nn.init.constant_(m.bias, 0)
+            #elif isinstance(m, torch.nn.InstanceNorm3d):
+            #    torch.nn.init.constant_(m.weight, 1)
+            #    torch.nn.init.constant_(m.bias, 0)
             # elif isinstance(m, torch.nn.Linear):
             #    print("initializing linear")
             #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
@@ -1944,30 +1939,30 @@ class inorm_net(torch.nn.Module): #conv1,2,3,4 here are similar to densenet
         #if self.includesft:
         #    x = torch.chunk(x,2,dim=1)[1] #chunks [binary, pet, fourier] --> [binary,pet], [fourier] and takes fourier
 
-        x = self.conv1(x)
-        x = self.norm1(x)
-        x = self.relu1(x)
+        x = self.conv1_i(x)
+        x = self.norm1_i(x)
+        #x = self.relu1(x)
 
         x = self.layer1(x)
 
         x = self.maxpool1(x)
-        x = self.conv2(x)
-        x = self.norm2(x)
-        x = self.relu2(x)
+        #x = self.conv2_2(x)
+        x = self.norm2_i(x)
+        #x = self.relu2_i(x)
 
         x = self.layer2(x)
 
         x = self.maxpool2(x)
-        x = self.conv3(x)
-        x = self.norm3(x)
-        x = self.relu3(x)
+        #x = self.conv3(x)
+        x = self.norm3_i(x)
+        #x = self.relu3_i(x)
 
         x = self.layer3(x)
 
         x = self.maxpool3(x)
-        x = self.conv4(x)
-        x = self.norm4(x)
-        x = self.relu4(x)
+        #x = self.conv4(x)
+        x = self.norm4_i(x)
+        #x = self.relu4_i(x)
 
         x = self.layer4(x)
         #x = self.layer5(x)
@@ -2058,8 +2053,8 @@ def NetConstant_IN_normtail(numoutputs,dropoutrate,includesft):
 def NetConstant_IN_norm(numoutputs,dropoutrate,includesft):
     return NetConstant_l4_extended_norm(BasicBlockInv_Pool_constant_n4_inorm, [2,2,2,2], numoutputs, 64, includesft=includesft)
 
-def inormnet_new(numoutputs,dropoutrate,includesft):
-    return inorm_net(inorm_block, [4,4,4,2], numoutputs, 64, includesft=includesft)
+def inormnet_new_light(numoutputs,dropoutrate,includesft): #similar to netconstant_IN_norm, checking performance diff
+    return inorm_net(inorm_block, [4,4,4,4], numoutputs, 64, includesft=includesft)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,

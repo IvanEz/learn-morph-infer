@@ -26,8 +26,8 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v7" #older models may not work with this version if you use "--includeft" which here means ONLY FT INPUT
-#includes necrotic core
+version = "v7" #only use newer models with this version
+#includes necrotic core + normalized pet
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
 parser.add_argument('--isnewsave', action='store_true') #--isnewsave -> training, if not there: inference
