@@ -180,24 +180,7 @@ if is_new_save:
 #modelfun = NetConstant_64_n2_l4_noglobalpool
 #modelfun = NetConstant_noBN_64_n4_l4
 #modelfun = NetConstant_IN_normtail
-#modelfun = NetConstant_IN_norm
-#modelfun = inormnet_new_light
-#modelfun = inormnet_new_light_convnormrelu
-#modelfun = inormnet_new_128
-#modelfun = inormnet_new_doubling_4
-#modelfun = inormnet_new_light_convnormrelu_4
-#modelfun = inormnet_new_light_different
-#modelfun = inormnet_new_light4
-#modelfun = inormnet_new_light_128
-
-
-#modelfun = inormnet_new_4
-#modelfun = new_4
-#modelfun = NetConstant_noBN_64_n4_l4_inplace
-#modelfun = inormnet_new_light
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull_do
-modelfun = NetConstant_noBN_64_n4_l4_inplacefull
+modelfun = NetConstant_IN_norm
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 #model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__

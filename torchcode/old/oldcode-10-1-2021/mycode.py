@@ -2444,7 +2444,6 @@ class inorm_net_convnormrelu(torch.nn.Module): #conv1,2,3,4 here are similar to 
             elif isinstance(m, torch.nn.InstanceNorm3d):
                 torch.nn.init.constant_(m.weight, 1)
                 torch.nn.init.constant_(m.bias, 0)
-                #analogous init as for bn in https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
             # elif isinstance(m, torch.nn.Linear):
             #    print("initializing linear")
             #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
@@ -2453,7 +2452,6 @@ class inorm_net_convnormrelu(torch.nn.Module): #conv1,2,3,4 here are similar to 
             if isinstance(m, inorm_block_convnormrelu):
                 print("zero initializing norm2")
                 torch.nn.init.constant_(m.norm2.weight, 0)
-                #zero initializes last norm layer in residual branch as in https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 
     def _make_layer(self, block, blocks, normalize=False):
         layers = []
@@ -3082,147 +3080,6 @@ class NetConstant_noBN_l4_leaky(torch.nn.Module):
 
         return x
 
-class NetConstant_noBN_l4_inplacefull(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, channels, includesft=False):
-        super(NetConstant_noBN_l4_inplacefull, self).__init__()
-
-        if not includesft:
-            self.inplanes = 2  # initial number of channels
-        else:
-            raise Exception("no ft")
-
-        self.conv1_i = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=True)
-        self.relu1_i = torch.nn.ReLU(inplace=True)
-        self.inplanes = channels
-
-        self.layer1 = self._make_layer(block, layers[0], downsample=False)
-        self.layer2 = self._make_layer(block, layers[1])
-        self.layer3 = self._make_layer(block, layers[2])
-        self.layer4 = self._make_layer(block, layers[3])
-        #self.layer5 = self._make_layer(block, layers[4])
-
-        #self.bn_final = torch.nn.BatchNorm3d(channels)
-        #self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        #self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                #torch.nn.init.constant_(m.weight, 1)
-                #torch.nn.init.constant_(m.bias, 0)
-                raise Exception("no batchnorm")
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, downsample=True):
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1_i(x)
-        x = self.relu1_i(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        #x = self.layer5(x)
-
-        #x = self.bn_final(x)
-        #x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        #x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
-
-class NetConstant_noBN_l4_inplacefull_do(torch.nn.Module):
-    def __init__(self, block, layers, numoutputs, channels, dropoutrate, includesft=False):
-        super(NetConstant_noBN_l4_inplacefull_do, self).__init__()
-
-        if not includesft:
-            self.inplanes = 2  # initial number of channels
-        else:
-            raise Exception("no ft")
-
-        self.conv1_i = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=True)
-        self.relu1_i = torch.nn.ReLU(inplace=True)
-        self.inplanes = channels
-
-        self.layer1 = self._make_layer(block, layers[0], downsample=False)
-        self.layer2 = self._make_layer(block, layers[1])
-        self.layer3 = self._make_layer(block, layers[2])
-        self.layer4 = self._make_layer(block, layers[3])
-        #self.layer5 = self._make_layer(block, layers[4])
-
-        #self.bn_final = torch.nn.BatchNorm3d(channels)
-        #self.relu_final = torch.nn.ReLU()
-        self.avgpool = torch.nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.do = torch.nn.Dropout(p=dropoutrate)
-        self.fc = torch.nn.Linear(channels, numoutputs)
-        #self.tanh = torch.nn.Tanh()
-
-        # TODO: try 'fan_out' init
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv3d):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, torch.nn.BatchNorm3d):
-                #torch.nn.init.constant_(m.weight, 1)
-                #torch.nn.init.constant_(m.bias, 0)
-                raise Exception("no batchnorm")
-            # elif isinstance(m, torch.nn.Linear):
-            #    print("initializing linear")
-            #    torch.nn.init.kaiming_uniform_(m.weight, a=1.0)
-
-    def _make_layer(self, block, blocks, downsample=True):
-        layers = []
-        layers.append(block(self.inplanes, downsample))
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes))
-
-        return torch.nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1_i(x)
-        x = self.relu1_i(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        #x = self.layer5(x)
-
-        #x = self.bn_final(x)
-        #x = self.relu_final(x)
-
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.do(x)
-        # print(f"Layer before fc: {x.mean()}, {x.std()}")
-        x = self.fc(x)
-        # print(f"Layer after fc: {x.mean()}, {x.std()}")
-        # print("Before tanh: " + str(x))
-        #x = self.tanh(x)
-        # print(f"Layer after tanh: {x.mean()}, {x.std()}")
-
-        return x
 
 def ResNetInvBasic(numoutputs, dropoutrate):
     return ResNetInv(BasicBlockInv, [3,3,4,4,2], numoutputs, dropoutrate)
@@ -3336,15 +3193,6 @@ def NetConstant_noBN_64_n4_l4_inplace(numoutputs, dropoutrate, includesft): #we 
 
 def NetConstant_noBN_64_n4_l4_inplace_leaky(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
     return NetConstant_noBN_l4_leaky(BasicBlockInv_Pool_constant_noBN_n4_inplace_leaky, [1,1,1,1], numoutputs, 64, includesft=includesft)
-
-def NetConstant_noBN_64_n4_l4_inplacefull_deeper(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN_l4_inplacefull(BasicBlockInv_Pool_constant_noBN_n4_inplace, [2,2,2,2], numoutputs, 64, includesft=includesft)
-
-def NetConstant_noBN_64_n4_l4_inplacefull(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN_l4_inplacefull(BasicBlockInv_Pool_constant_noBN_n4_inplace, [1,1,1,1], numoutputs, 64, includesft=includesft)
-
-def NetConstant_noBN_64_n4_l4_inplacefull_do(numoutputs, dropoutrate, includesft):
-    return NetConstant_noBN_l4_inplacefull_do(BasicBlockInv_Pool_constant_noBN_n4_inplace, [1,1,1,1], numoutputs, 64, dropoutrate, includesft=includesft)
 
 def save_inverse_model(savelogdir, epoch, model_state_dict, optimizer_state_dict, best_val_loss, total_train_loss,
                        dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate,

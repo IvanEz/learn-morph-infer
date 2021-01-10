@@ -194,10 +194,7 @@ if is_new_save:
 #modelfun = inormnet_new_4
 #modelfun = new_4
 #modelfun = NetConstant_noBN_64_n4_l4_inplace
-#modelfun = inormnet_new_light
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull_do
-modelfun = NetConstant_noBN_64_n4_l4_inplacefull
+modelfun = inormnet_new_light
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 #model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
 modelfun_name = modelfun.__name__
