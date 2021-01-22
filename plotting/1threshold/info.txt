@@ -1,0 +1,104 @@
+left:
+(torchenv) ivan_kevins@ibbm_giga:/mnt/Drive2/ivan_kevin/differentv$ python3 tumorgen.py --sqrtTp 4 --sqrtDT 8
+Namespace(sqrtDT=8.0, sqrtTp=4.0, v=150.0)
+[150.0]
+[37.5]
+[0.4266666666666667]
+['8.0-150.0-4.0']
+8.0-150.0-4.0
+Tumor: Dw = 150.0 mm^2/yr, p = 37.5 1/yr, T = 0.4266666666666667 yr, D/p = 4.0 mm^2, Tp = 16.0, sqrt(DT) = 8.0, sqrt(Tp) = 4.0 v = 150.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+parameter set in range
+Inputting D2 = 0.004109589041095891 cm^2/d, p2 = 0.10273972602739725 1/yr, T2 = 155.73333333333335d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.004109589041095891 -rho 0.10273972602739725 -Tend 155.73333333333335 -dumpfreq 155.57760000000002 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=7.836596e-07, Dw=7.836596e-06, dt= 1.285099, rho=0.102740 , h=0.007812
+Dumping data at time t=156.781799
+Dg=7.836596e-07, Dw=7.836596e-06, dt= 1.285099, rho=0.102740 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 36.25 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/8.0-150.0-4.0-Data_0001.npz
+File saved at  npzs/sim/8.0-150.0-4.0-Data_0000.npz
+
+-----------------------------------------------------------
+
+right:
+(torchenv) ivan_kevins@ibbm_giga:/mnt/Drive2/ivan_kevin/differentv$ python3 tumorgen.py --sqrtDT 12 --sqrtTp 3.5 --v 30
+Namespace(sqrtDT=12.0, sqrtTp=3.5, v=30.0)
+[51.42857142857142]
+[4.375]
+[2.8]
+['12.0-30.0-3.5']
+12.0-30.0-3.5
+Tumor: Dw = 51.42857142857142 mm^2/yr, p = 4.375 1/yr, T = 2.8 yr, D/p = 11.755102040816325 mm^2, Tp = 12.25, sqrt(DT) = 12.0, sqrt(Tp) = 3.5 v = 29.999999999999996 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+parameter set in range
+Inputting D2 = 0.0014090019569471624 cm^2/d, p2 = 0.011986301369863013 1/yr, T2 = 1021.9999999999999d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0014090019569471624 -rho 0.011986301369863013 -Tend 1021.9999999999999 -dumpfreq 1020.9779999999998 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.686833e-07, Dw=2.686833e-06, dt= 3.748205, rho=0.011986 , h=0.007812
+Dumping data at time t=1023.262878
+Dg=2.686833e-07, Dw=2.686833e-06, dt= 3.748205, rho=0.011986 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 63.15 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/12.0-30.0-3.5-Data_0001.npz
+File saved at  npzs/sim/12.0-30.0-3.5-Data_0000.npz
+----------------------
+
+left: d >= 0.7
+right: d >= 0.75
+
+slice=51
+-----------------------
+
+dice = 0.94

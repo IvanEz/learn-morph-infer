@@ -26,7 +26,7 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-version = "v7" #only use newer models with this version
+version = "v7_1"
 #includes necrotic core + normalized pet
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default=4, type=int)
@@ -125,6 +125,10 @@ if is_new_save:
         numoutputs = 3
     elif outputmode == 3:
         numoutputs = 2
+    elif outputmode == 4:
+        numoutputs = 2
+    elif outputmode == 5:
+        numoutputs = 3
     else:
         raise Exception("invalid output mode")
 else:
@@ -166,37 +170,7 @@ if is_new_save:
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
 #torch.manual_seed(random_seed)
-#modelfun = ResNetInv2DeeperPool
-#modelfun = ResNetInvPreActDirect_Small
-#modelfun = ResNetInvPreActDirect_Medium
-#modelfun = PreActNetConstant_16_n1
-#modelfun = NetConstant_noBN_16_n1
-#modelfun = NetConstant_noBN_32_n1
-#modelfun = NetConstant_noBN_16_n1_l4_TWONET
-#modelfun = NetConstant_noBN_16_n1_l4_TWONET_fc
-#modelfun = NetConstant_noBN_32_n2_l4
-
-#modelfun = NetConstant_noBN_16_n1_l4
-#modelfun = NetConstant_64_n2_l4_noglobalpool
-#modelfun = NetConstant_noBN_64_n4_l4
-#modelfun = NetConstant_IN_normtail
-#modelfun = NetConstant_IN_norm
-#modelfun = inormnet_new_light
-#modelfun = inormnet_new_light_convnormrelu
-#modelfun = inormnet_new_128
-#modelfun = inormnet_new_doubling_4
-#modelfun = inormnet_new_light_convnormrelu_4
-#modelfun = inormnet_new_light_different
-#modelfun = inormnet_new_light4
-#modelfun = inormnet_new_light_128
-
-
-#modelfun = inormnet_new_4
-#modelfun = new_4
 #modelfun = NetConstant_noBN_64_n4_l4_inplace
-#modelfun = inormnet_new_light
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull
-#modelfun = NetConstant_noBN_64_n4_l4_inplacefull_do
 modelfun = NetConstant_noBN_64_n4_l4_inplacefull
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 #model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate)
@@ -363,6 +337,8 @@ else:
     mus = []
     velocities = []
 
+    sqrtDTs = []
+
     for path in (train_dataset.all_paths + val_dataset.all_paths):
         with open(path + "parameter_tag2.pkl", "rb") as par:
             params = pickle.load(par)
@@ -374,9 +350,12 @@ else:
             mu = Tend * rho  # constant
             velocity = 2 * np.sqrt(Dw * rho)  # cm / d
 
+            sqrtDT = np.sqrt(Dw * Tend) #cm
+
             lambdas.append(lambdaw)
             mus.append(mu)
             velocities.append(velocity)
+            sqrtDTs.append(sqrtDT)
 
     lambda_min = np.min(lambdas)
     lambda_max = np.max(lambdas)
@@ -385,6 +364,11 @@ else:
     velocity_min = np.min(velocities)
     velocity_max = np.max(velocities)
 
+    sqrtmu_min = np.min(np.sqrt(mus))
+    sqrtmu_max = np.max(np.sqrt(mus))
+
+    sqrtDT_min = np.min(sqrtDTs)
+    sqrtDT_max = np.max(sqrtDTs)
 
     with torch.set_grad_enabled(False):
         for batch_idy, (x, y) in enumerate(val_generator):
@@ -469,5 +453,8 @@ else:
         elif outputmode == 3:
             ranged_error("lambda", 0, [np.sqrt(0.001), np.sqrt(7.5)], ys, yspredicted, [lambda_min, lambda_max], loaddir)
             ranged_error("mu", 1, [0.1, 300.0], ys, yspredicted, [mu_min, mu_max], loaddir)
+        elif outputmode == 4:
+            ranged_error("sqrt(DT)", 0, [0.1, np.sqrt(22.5)], ys, yspredicted, [sqrtDT_min, sqrtDT_max], loaddir)
+            ranged_error("sqrt(Tp)", 1, np.sqrt([0.1, 300.0]), ys, yspredicted, [sqrtmu_min, sqrtmu_max], loaddir)
         print("############# RANGED ERROR ##################")
 

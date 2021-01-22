@@ -1,0 +1,6 @@
+in image: "0711-17-53-22", "1011-09-46-45", "1611-12-33-59", "1811-10-25-07", "2211-18-50-33", "2411-10-33-06 (epoch25)", "2611-21-06-42 (epoch16)", "0512-12-35-48 (epoch 37)"
+
+others:
+"0711-17-53-22": works but has oscillations, using l2+convnet+weightdecay+nodropout leads also to oscillations ("1011-10-16-13"), reducing numthrs=2 ("0911-11-13-26") does also not solve the problem
+
+we find the cause: BN or no BN? Two similar architectures trained: 2211-16-28-14 (has BN) vs 2211-18-50-33 (no BN) --> the one without BN does not have oscillations!
