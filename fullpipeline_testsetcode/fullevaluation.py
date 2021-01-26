@@ -221,7 +221,7 @@ if is_ugt:
     thresholds_scans = np.load(thresholdsdir + "/scanthresholds.npz")
     t1gd_thresholds = thresholds_scans['t1gd'][start : stop]
     flair_thresholds = thresholds_scans['flair'][start : stop]
-    necrotic_thresholds = thresholds_scans['necrotic'] [start : stop]
+    necrotic_thresholds = thresholds_scans['necrotic'][start : stop]
 
     if printeverything:
         print(f"t1gd_thresholds: {t1gd_thresholds}, flair_thresholds: {flair_thresholds}, necrotic_thresholds: {necrotic_thresholds}")
@@ -240,8 +240,7 @@ for (i, path) in enumerate(data_paths):
             t1gd = t1gd_thresholds[i]
             flair = flair_thresholds[i]
             necrotic = necrotic_thresholds[i]
-            if printeverything:
-                print(f"t1gd: {t1gd}, flair: {flair}, necrotic: {necrotic}")
+            print(f"t1gd: {t1gd}, flair: {flair}, necrotic: {necrotic}")
             t1gd_scan = (volume >= t1gd).astype(float)
             flair_scan = (volume >= flair).astype(float)
             mri_scan = 0.666 * t1gd_scan + 0.333 * flair_scan
@@ -369,11 +368,9 @@ for (i, path) in enumerate(data_paths):
         resultstosave.append({"t1gd": t1gd, "flair": flair, "necrotic": necrotic,
                               "mu1_gt": mu1_gt, "mu2_gt": mu2_gt,
                               "mu1_predicted": mu1_predicted, "mu2_predicted": mu2_predicted,
-                              "mu1_relative_error": mu1_relative_error, "mu2_relative_error": mu2_relative_error,
                               "icx_gt": icx_gt, "icy_gt": icy_gt, "icz_gt": icz_gt,
                               "icx_predicted": icx_predicted, "icy_predicted": icy_predicted, "icz_predicted": icz_predicted,
-                              "icx_absolute_error": icx_absolute_error, "icy_absolute_error": icy_absolute_error, "icz_absolute_error": icz_absolute_error,
-                              "diceresults": diceresults
+                              "diceresults": diceresults, "identifier": start + i, "path": path
                               })
 
     if printeverything:
@@ -382,8 +379,12 @@ for (i, path) in enumerate(data_paths):
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
 
-with open("evaluation-" + str(parapid) + "-" + currenttime + "start-" + str(start) + "-stop-" + str(stop) + "-" + name + ".pkl", "wb") as savefile:
+#with open("evaluation-" + str(parapid) + "-" + currenttime + "start-" + str(start) + "-stop-" + str(stop) + "-" + name + ".pkl", "wb") as savefile:
+#    pickle.dump(resultstosave, savefile)
+
+with open("evaluation" + str(parapid) + ".pkl", "wb") as savefile:
     pickle.dump(resultstosave, savefile)
 
-
 #np.savez_compressed("evaluation-" + str(parapid) + "-" + currenttime + "start-" + str(start) + "-stop-" + str(stop) + "-" + name, results=np.array(resultstosave))
+
+print("Terminated successfully")
