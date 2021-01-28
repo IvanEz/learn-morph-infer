@@ -13,6 +13,7 @@ import os
 from multiprocessing import Pool
 from functools import partial
 import argparse
+import sys
 #os.environ["CUDA_VISIBLE_DEVICES"]="0"
 #import pandas as pd
 #from scipy.ndimage import map_coordinates, morphology, generate_binary_structure
@@ -106,6 +107,6 @@ for dir in dir_list:
     #first_file = False
     
 
-    pool = Pool(2)
+    pool = Pool(1)
     pool.map(extract_VTK, files_cfd)
     pool.close()

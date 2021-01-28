@@ -88,13 +88,13 @@ class Dataset2(Dataset):
     # We remove tanh from last layer when predicting infiltration length + Tp + velocity, because mean of Dw and p
     # after bringing into range [-1, 1] was at 0. Since we now predict products of these factors, we can observe
     # our data and see that when we normalize into [-1, 1] range, the mean (of our TRAINING DATA) is not at 0 anymore!
-    def __init__(self, datapath, beginning, ending, thrpath, necroticpath, num_thresholds=100, includesft=False, outputmode=0):
+    def __init__(self, datapath, beginning, ending, thrpath, num_thresholds=100, includesft=False, outputmode=0):
         Dataset.__init__(self, datapath, beginning, ending, thrpath, num_thresholds=num_thresholds)
         self.includesft = includesft
         self.outputmode = outputmode
-        self.necroticpath = necroticpath
-        self.necrotic_paths = sorted(glob("{}/*".format(self.necroticpath)))[self.beginning : self.ending]
-        assert len(self.necrotic_paths) == self.datasetsize
+        #self.necroticpath = necroticpath
+        #self.necrotic_paths = sorted(glob("{}/*".format(self.necroticpath)))[self.beginning : self.ending]
+        #assert len(self.necrotic_paths) == self.datasetsize
 
     def __len__(self):
         return self.datasetsize
@@ -102,7 +102,7 @@ class Dataset2(Dataset):
     def __getitem__(self, index):
         file_path = self.all_paths[index]
         thr_path = self.threshold_paths[index]
-        necrotic_path = self.necrotic_paths[index]
+        #necrotic_path = self.necrotic_paths[index]
 
         with np.load(thr_path) as thresholdsfile:
             t1gd_thr = thresholdsfile['t1gd'][self.epoch % self.num_thresholds]
@@ -110,9 +110,9 @@ class Dataset2(Dataset):
             assert t1gd_thr >= 0.5 and t1gd_thr <= 0.85
             assert flair_thr >= 0.05 and flair_thr <= 0.5
 
-        with np.load(necrotic_path) as necroticfile:
-            necrotic_thr = necroticfile['necrotic'][self.epoch % self.num_thresholds]
-            assert necrotic_thr >= 0.95 and necrotic_thr <= 1.0
+        #with np.load(necrotic_path) as necroticfile:
+        #    necrotic_thr = necroticfile['necrotic'][self.epoch % self.num_thresholds]
+        #    assert necrotic_thr >= 0.95 and necrotic_thr <= 1.0
         # print("got pos " + str(index) + " which corresponds to " + str(file_path))
         with np.load(file_path + "Data_0001_thr2.npz") as data:
             # thrvolume = data['thr2_data']
@@ -134,21 +134,23 @@ class Dataset2(Dataset):
 
             #b = 0.5
 
-            pet_volume = ((volume_resized >= t1gd_thr) * volume_resized)
-            pet_volume = (pet_volume <= necrotic_thr) * pet_volume
-            pet_volume_max = pet_volume.max()
-            assert pet_volume_max >= 0.0
-            if pet_volume_max == 0.0:
-                print(f"LIGHT WARNING: empty pet volume for {file_path}")
-                #no division by max, volume is left empty
-            else:
-                pet_volume = pet_volume / pet_volume.max()
+            #pet_volume = ((volume_resized >= t1gd_thr) * volume_resized)
+            #pet_volume = (pet_volume <= necrotic_thr) * pet_volume
+            #pet_volume_max = pet_volume.max()
+            #assert pet_volume_max >= 0.0
+            #if pet_volume_max == 0.0:
+            #    print(f"LIGHT WARNING: empty pet volume for {file_path}")
+            #    #no division by max, volume is left empty
+            #else:
+            #    pet_volume = pet_volume / pet_volume.max()
             #print(pet_volume.shape)
-            pet_volume_reshaped = np.expand_dims(pet_volume, -1) #now 129x129x129x1
+            #pet_volume_reshaped = np.expand_dims(pet_volume, -1) #now 129x129x129x1
             #print(pet_volume_reshaped.shape)
 
-            nn_input = np.concatenate((thrvolume_resized, pet_volume_reshaped), -1)
+            #nn_input = np.concatenate((thrvolume_resized, pet_volume_reshaped), -1)
             #print(nn_input.shape)
+
+            nn_input = thrvolume_resized
 
             if self.includesft:
                 '''
@@ -279,15 +281,15 @@ class BasicBlockInv_Pool_constant_noBN_n4_inplace(torch.nn.Module):
         #out += x
 
         return out
-
+'''
 class NetConstant_noBN_l4(torch.nn.Module):
     def __init__(self, block, layers, numoutputs, channels, includesft=False):
         super(NetConstant_noBN_l4, self).__init__()
 
         if not includesft:
-            self.inplanes = 2  # initial number of channels
+            self.inplanes = 1  # initial number of channels
         else:
-            self.inplanes = 3
+            raise Exception("no ft")
 
         self.conv1 = torch.nn.Conv3d(self.inplanes, channels, kernel_size=7, stride=2, padding=2, bias=True)
         self.relu1 = torch.nn.ReLU()
@@ -350,13 +352,13 @@ class NetConstant_noBN_l4(torch.nn.Module):
         # print(f"Layer after tanh: {x.mean()}, {x.std()}")
 
         return x
-
+'''
 class NetConstant_noBN_l4_inplacefull(torch.nn.Module):
     def __init__(self, block, layers, numoutputs, channels, includesft=False):
         super(NetConstant_noBN_l4_inplacefull, self).__init__()
 
         if not includesft:
-            self.inplanes = 2  # initial number of channels
+            self.inplanes = 1  # initial number of channels
         else:
             raise Exception("no ft")
 
@@ -422,8 +424,8 @@ class NetConstant_noBN_l4_inplacefull(torch.nn.Module):
 
         return x
 
-def NetConstant_noBN_64_n4_l4_inplace(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
-    return NetConstant_noBN_l4(BasicBlockInv_Pool_constant_noBN_n4_inplace, [1,1,1,1], numoutputs, 64, includesft=includesft)
+#def NetConstant_noBN_64_n4_l4_inplace(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
+#    return NetConstant_noBN_l4(BasicBlockInv_Pool_constant_noBN_n4_inplace, [1,1,1,1], numoutputs, 64, includesft=includesft)
 
 def NetConstant_noBN_64_n4_l4_inplacefull(numoutputs, dropoutrate, includesft): #we keep dropout rate although unused so don't change main.py code
     return NetConstant_noBN_l4_inplacefull(BasicBlockInv_Pool_constant_noBN_n4_inplace, [1,1,1,1], numoutputs, 64, includesft=includesft)

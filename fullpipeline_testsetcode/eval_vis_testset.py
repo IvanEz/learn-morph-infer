@@ -150,16 +150,16 @@ for result in allresults:
     #mu2_relative_errors.append(mu2_relative_error)
 
 
-    '''
-    f = plt.figure()
-    plt.hist(icx_absolute_errors, bins=50, figure=f)
-    plt.title("icx_absolute_errors" + ", mean = " + str(np.round(np.array(icx_absolute_errors).mean(), 3)) + ", evaluated: " + str(len(icx_absolute_errors)))
-    plt.savefig('icx_absolute_errors.png')
-    '''
+'''
+f = plt.figure()
+plt.hist(icx_absolute_errors, bins=50, figure=f)
+plt.title("icx_absolute_errors" + ", mean = " + str(np.round(np.array(icx_absolute_errors).mean(), 3)) + ", evaluated: " + str(len(icx_absolute_errors)))
+plt.savefig('icx_absolute_errors.png')
+'''
 
-    plothist(ic_absolute_errors, "ic_absolute_errors")
-    #plothist(icx_absolute_errors, "icx_absolute_errors")
-    #plothist(icy_absolute_errors, "icy_absolute_errors")
-    #plothist(icz_absolute_errors, "icz_absolute_errors")
-    #plothist(mu1_relative_errors, "mu1_relative_errors")
-    #plothist(mu2_relative_errors, "mu2_relative_errors")
+plothist(ic_absolute_errors, "ic_absolute_errors")
+#plothist(icx_absolute_errors, "icx_absolute_errors")
+#plothist(icy_absolute_errors, "icy_absolute_errors")
+#plothist(icz_absolute_errors, "icz_absolute_errors")
+#plothist(mu1_relative_errors, "mu1_relative_errors")
+#plothist(mu2_relative_errors, "mu2_relative_errors")

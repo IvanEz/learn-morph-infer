@@ -323,7 +323,7 @@ for (i, path) in enumerate(data_paths):
 
     simulation = subprocess.check_call([command], shell=True, cwd="./vtus" + str(parapid) + "/sim/")  # e.g. ./vtus0/sim/
     tumorname = str(start + i) + "-" + currenttime
-    vtu2npz = subprocess.check_call(["python3 vtutonpz3.py --parapid " + str(parapid) + " --name " + tumorname], shell=True)
+    vtu2npz = subprocess.check_call(["python3 -u vtutonpz3.py --parapid " + str(parapid) + " --name " + tumorname], shell=True)
 
     with np.load("./npzresults/sim/" + tumorname + "Data_0001.npz") as inferredtumor:
         u_sim = inferredtumor['data'][:,:,:,0]

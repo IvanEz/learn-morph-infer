@@ -140,14 +140,14 @@ startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external valida
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
 train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
+                        "/mnt/Drive2/ivan_kevin/thresholds/files",
                          num_thresholds=num_thresholds, includesft=includesft,
                          outputmode=outputmode)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
-                      "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
+                      "/mnt/Drive2/ivan_kevin/thresholds/files",
                        includesft=includesft, outputmode=outputmode)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
@@ -183,14 +183,14 @@ summarystring = repr(model)
 print(summarystring)
 
 if not includesft:
-    additionalsummary, _ = summary_string(model, (2,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
+    additionalsummary, _ = summary_string(model, (1,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
 else:
     additionalsummary, _ = summary_string(model, (1, 129, 129, 129), device="cpu")
 print(additionalsummary)
 
 if is_new_save:
     if not includesft:
-        writer.add_graph(model, Variable(torch.rand(1,2,129,129,129)))
+        writer.add_graph(model, Variable(torch.rand(1,1,129,129,129)))
     else:
         writer.add_graph(model, Variable(torch.rand(1, 1, 129, 129, 129)))
 ##### summaries #####
