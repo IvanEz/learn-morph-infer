@@ -147,6 +147,11 @@ if randomv:
 '''
 
 assert constantv and not randomv #for evaluator2 you can only use constantv
+#if you use outputmode 5 (predict D,p,T), you will NOT use constantv obviously. however, to avoid changing code you still have
+#to use this flag --> please don't be confused. this assertion is a relict when we experimented with randomv to make sure
+#that you understood which velocity was being used.
+#if you now use evaluator2.py, you will always have constantv WHEN you predict time independent parameter combinations
+#when you don't predict D,p,T, the velocity depends on parameters and therefore a constant velocity is NOT used
 
 #choose between (lambda,mu,v), (sqrtDT, sqrtTp), (D,p,T)
 assert outputmode == 3 or outputmode == 4 or outputmode == 5
@@ -240,10 +245,10 @@ for i in range(0, len(all_paths)):
     #make it more beautiful unfortunately.
     print(f"l1: GROUND TRUTH (all) in pkl: {gt_inrange_inpkl_all}")
     print(f"l2: GROUND TRUTH (growth + location) in pkl: {gt_inrange_inpkl}")
-    print(f"l3: GROUND TRUTH (all) in results.npz (with fixed v when not in debug mode): {gt_inrange_innpz}")
+    print(f"l3: GROUND TRUTH (all) in results.npz (with fixed v when not in debug mode): {gt_inrange_innpz}") #wrong: with fixed v when time independent parameters have been predicted
     print(f"l4: GROUND TRUTH (growth + location) in results.npz: {gt_inrange_innpz_growthloc}")
     print(f"PREDICTED (growth + location): {convertfun_reverse(predicted_inrange[0], predicted_inrange[1], predicted_inrange[2], predicted_inrange[3], predicted_inrange[4], predicted_inrange[5])}")
-    print(f"PREDICTED (all): {predicted_inrange} with constantv = {constantv}")
+    print(f"PREDICTED (all): {predicted_inrange} with constantv = {constantv}") #again: if you use outputmode 5, even though you used contantv flag, it is not constant velocity!
 
     Dw = predicted_inrange[0]
     rho = predicted_inrange[1]
