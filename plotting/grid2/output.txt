@@ -1,0 +1,689 @@
+[47.43416490252569, 284.60498941515414, 63.245553203367585, 379.47331922020555, 79.05694150420948, 474.34164902525686, 33.54101966249684, 201.24611797498108, 44.721359549995796, 268.32815729997475, 55.90169943749474, 335.4101966249685, 27.386127875258303, 164.31676725154983, 36.51483716701107, 219.08902300206643, 45.64354645876384, 273.8612787525831]
+[13.176156917368248, 79.05694150420949, 9.882117688026185, 59.292706128157114, 7.905694150420949, 47.434164902525694, 18.633899812498246, 111.80339887498948, 13.975424859373685, 83.85254915624212, 11.180339887498947, 67.08203932499369, 22.82177322938192, 136.93063937629154, 17.116329922036442, 102.69797953221865, 13.693063937629152, 82.15838362577492]
+[0.758946638440411, 0.12649110640673517, 1.0119288512538815, 0.16865480854231357, 1.2649110640673515, 0.21081851067789192, 1.0733126291998991, 0.17888543819998318, 1.4310835055998654, 0.23851391759997756, 1.788854381999832, 0.29814239699997197, 1.3145341380123987, 0.21908902300206642, 1.7527121840165314, 0.2921186973360886, 2.1908902300206647, 0.3651483716701107]
+['36-50-10', '36-300-10', '64-50-10', '64-300-10', '100-50-10', '100-300-10', '36-50-20', '36-300-20', '64-50-20', '64-300-20', '100-50-20', '100-300-20', '36-50-30', '36-300-30', '64-50-30', '64-300-30', '100-50-30', '100-300-30']
+36-50-10
+Tumor: Dw = 47.43416490252569 mm^2/yr, p = 13.176156917368248 1/yr, T = 0.758946638440411 yr, D/p = 3.5999999999999996 mm^2, Tp = 10.0, sqrt(DT) = 6.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0012995661617130326 cm^2/d, p2 = 0.03609906004758424 1/yr, T2 = 277.01552303075d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0012995661617130326 -rho 0.03609906004758424 -Tend 277.01552303075 -dumpfreq 276.73850750771925 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.478149e-07, Dw=2.478149e-06, dt= 4.063840, rho=0.036099 , h=0.007812
+Dumping data at time t=280.405090
+Dg=2.478149e-07, Dw=2.478149e-06, dt= 4.063840, rho=0.036099 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 28.26 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-50-10-Data_0001.npz
+File saved at  npzs/sim/36-50-10-Data_0000.npz
+36-300-10
+Tumor: Dw = 284.60498941515414 mm^2/yr, p = 79.05694150420949 1/yr, T = 0.12649110640673517 yr, D/p = 3.5999999999999996 mm^2, Tp = 10.0, sqrt(DT) = 6.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.007797396970278196 cm^2/d, p2 = 0.21659436028550547 1/yr, T2 = 46.16925383845834d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.007797396970278196 -rho 0.21659436028550547 -Tend 46.16925383845834 -dumpfreq 46.12308458461988 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.486889e-06, Dw=1.486890e-05, dt= 0.677307, rho=0.216594 , h=0.007812
+Dumping data at time t=46.734173
+Dg=1.486889e-06, Dw=1.486890e-05, dt= 0.677307, rho=0.216594 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 32.39 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-300-10-Data_0001.npz
+File saved at  npzs/sim/36-300-10-Data_0000.npz
+64-50-10
+Tumor: Dw = 63.245553203367585 mm^2/yr, p = 9.882117688026185 1/yr, T = 1.0119288512538815 yr, D/p = 6.4 mm^2, Tp = 10.0, sqrt(DT) = 8.0, v = 49.99999999999999 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0017327548822840435 cm^2/d, p2 = 0.027074295035688176 1/yr, T2 = 369.35403070766677d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0017327548822840435 -rho 0.027074295035688176 -Tend 369.35403070766677 -dumpfreq 368.9846766769591 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=3.304199e-07, Dw=3.304199e-06, dt= 3.047880, rho=0.027074 , h=0.007812
+Dumping data at time t=371.841553
+Dg=3.304199e-07, Dw=3.304199e-06, dt= 3.047880, rho=0.027074 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 37.58 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-50-10-Data_0001.npz
+File saved at  npzs/sim/64-50-10-Data_0000.npz
+64-300-10
+Tumor: Dw = 379.47331922020555 mm^2/yr, p = 59.292706128157114 1/yr, T = 0.16865480854231357 yr, D/p = 6.4 mm^2, Tp = 10.0, sqrt(DT) = 8.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.010396529293704262 cm^2/d, p2 = 0.1624457702141291 1/yr, T2 = 61.55900511794445d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.010396529293704262 -rho 0.1624457702141291 -Tend 61.55900511794445 -dumpfreq 61.49744611282651 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.982519e-06, Dw=1.982519e-05, dt= 0.507980, rho=0.162446 , h=0.007812
+Dumping data at time t=61.973595
+Dg=1.982519e-06, Dw=1.982519e-05, dt= 0.507980, rho=0.162446 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 37.50 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-300-10-Data_0001.npz
+File saved at  npzs/sim/64-300-10-Data_0000.npz
+100-50-10
+Tumor: Dw = 79.05694150420948 mm^2/yr, p = 7.905694150420949 1/yr, T = 1.2649110640673515 yr, D/p = 9.999999999999998 mm^2, Tp = 10.0, sqrt(DT) = 10.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.002165943602855054 cm^2/d, p2 = 0.021659436028550545 1/yr, T2 = 461.6925383845833d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.002165943602855054 -rho 0.021659436028550545 -Tend 461.6925383845833 -dumpfreq 461.23084584619875 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=4.130249e-07, Dw=4.130249e-06, dt= 2.438304, rho=0.021659 , h=0.007812
+Dumping data at time t=463.277039
+Dg=4.130249e-07, Dw=4.130249e-06, dt= 2.438304, rho=0.021659 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 52.09 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-50-10-Data_0001.npz
+File saved at  npzs/sim/100-50-10-Data_0000.npz
+100-300-10
+Tumor: Dw = 474.34164902525686 mm^2/yr, p = 47.434164902525694 1/yr, T = 0.21081851067789192 yr, D/p = 9.999999999999998 mm^2, Tp = 10.0, sqrt(DT) = 10.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.012995661617130326 cm^2/d, p2 = 0.12995661617130327 1/yr, T2 = 76.94875639743056d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.012995661617130326 -rho 0.12995661617130327 -Tend 76.94875639743056 -dumpfreq 76.87180764103313 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.478149e-06, Dw=2.478149e-05, dt= 0.406384, rho=0.129957 , h=0.007812
+Dumping data at time t=77.213005
+Dg=2.478149e-06, Dw=2.478149e-05, dt= 0.406384, rho=0.129957 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 52.82 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-300-10-Data_0001.npz
+File saved at  npzs/sim/100-300-10-Data_0000.npz
+36-50-20
+Tumor: Dw = 33.54101966249684 mm^2/yr, p = 18.633899812498246 1/yr, T = 1.0733126291998991 yr, D/p = 1.8 mm^2, Tp = 20.0, sqrt(DT) = 6.0, v = 49.99999999999999 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0009189320455478588 cm^2/d, p2 = 0.051051780308214376 1/yr, T2 = 391.75910965796317d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0009189320455478588 -rho 0.051051780308214376 -Tend 391.75910965796317 -dumpfreq 391.3673505483052 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.752316e-07, Dw=1.752316e-06, dt= 5.747137, rho=0.051052 , h=0.007812
+Dumping data at time t=396.552216
+Dg=1.752316e-07, Dw=1.752316e-06, dt= 5.747137, rho=0.051052 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 29.45 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-50-20-Data_0001.npz
+File saved at  npzs/sim/36-50-20-Data_0000.npz
+36-300-20
+Tumor: Dw = 201.24611797498108 mm^2/yr, p = 111.80339887498948 1/yr, T = 0.17888543819998318 yr, D/p = 1.8 mm^2, Tp = 20.0, sqrt(DT) = 6.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.005513592273287153 cm^2/d, p2 = 0.3063106818492863 1/yr, T2 = 65.29318494299386d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.005513592273287153 -rho 0.3063106818492863 -Tend 65.29318494299386 -dumpfreq 65.22789175805087 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.051390e-06, Dw=1.051390e-05, dt= 0.957856, rho=0.306311 , h=0.007812
+Dumping data at time t=66.092064
+Dg=1.051390e-06, Dw=1.051390e-05, dt= 0.957856, rho=0.306311 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 28.00 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-300-20-Data_0001.npz
+File saved at  npzs/sim/36-300-20-Data_0000.npz
+64-50-20
+Tumor: Dw = 44.721359549995796 mm^2/yr, p = 13.975424859373685 1/yr, T = 1.4310835055998654 yr, D/p = 3.2 mm^2, Tp = 20.0, sqrt(DT) = 8.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0012252427273971452 cm^2/d, p2 = 0.038288835231160785 1/yr, T2 = 522.3454795439509d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0012252427273971452 -rho 0.038288835231160785 -Tend 522.3454795439509 -dumpfreq 521.823134064407 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.336421e-07, Dw=2.336421e-06, dt= 4.310353, rho=0.038289 , h=0.007812
+Dumping data at time t=525.863647
+Dg=2.336421e-07, Dw=2.336421e-06, dt= 4.310353, rho=0.038289 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 37.30 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-50-20-Data_0001.npz
+File saved at  npzs/sim/64-50-20-Data_0000.npz
+64-300-20
+Tumor: Dw = 268.32815729997475 mm^2/yr, p = 83.85254915624212 1/yr, T = 0.23851391759997756 yr, D/p = 3.1999999999999997 mm^2, Tp = 20.0, sqrt(DT) = 7.999999999999999, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.00735145636438287 cm^2/d, p2 = 0.22973301138696473 1/yr, T2 = 87.05757992399181d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.00735145636438287 -rho 0.22973301138696473 -Tend 87.05757992399181 -dumpfreq 86.97052234406782 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.401853e-06, Dw=1.401853e-05, dt= 0.718392, rho=0.229733 , h=0.007812
+Dumping data at time t=87.643776
+Dg=1.401853e-06, Dw=1.401853e-05, dt= 0.718392, rho=0.229733 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 36.56 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-300-20-Data_0001.npz
+File saved at  npzs/sim/64-300-20-Data_0000.npz
+100-50-20
+Tumor: Dw = 55.90169943749474 mm^2/yr, p = 11.180339887498947 1/yr, T = 1.788854381999832 yr, D/p = 5.000000000000001 mm^2, Tp = 20.0, sqrt(DT) = 10.0, v = 49.99999999999999 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0015315534092464314 cm^2/d, p2 = 0.030631068184928622 1/yr, T2 = 652.9318494299387d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0015315534092464314 -rho 0.030631068184928622 -Tend 652.9318494299387 -dumpfreq 652.2789175805087 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.920527e-07, Dw=2.920527e-06, dt= 3.448282, rho=0.030631 , h=0.007812
+Dumping data at time t=655.173950
+Dg=2.920527e-07, Dw=2.920527e-06, dt= 3.448282, rho=0.030631 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 47.89 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-50-20-Data_0001.npz
+File saved at  npzs/sim/100-50-20-Data_0000.npz
+100-300-20
+Tumor: Dw = 335.4101966249685 mm^2/yr, p = 67.08203932499369 1/yr, T = 0.29814239699997197 yr, D/p = 5.000000000000001 mm^2, Tp = 20.0, sqrt(DT) = 10.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.009189320455478588 cm^2/d, p2 = 0.18378640910957175 1/yr, T2 = 108.82197490498977d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.009189320455478588 -rho 0.18378640910957175 -Tend 108.82197490498977 -dumpfreq 108.71315293008479 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.752316e-06, Dw=1.752316e-05, dt= 0.574714, rho=0.183786 , h=0.007812
+Dumping data at time t=109.195755
+Dg=1.752316e-06, Dw=1.752316e-05, dt= 0.574714, rho=0.183786 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 48.42 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-300-20-Data_0001.npz
+File saved at  npzs/sim/100-300-20-Data_0000.npz
+36-50-30
+Tumor: Dw = 27.386127875258303 mm^2/yr, p = 22.82177322938192 1/yr, T = 1.3145341380123987 yr, D/p = 1.2 mm^2, Tp = 30.0, sqrt(DT) = 6.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0007503048732947481 cm^2/d, p2 = 0.06252540610789567 1/yr, T2 = 479.80496037452554d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0007503048732947481 -rho 0.06252540610789567 -Tend 479.80496037452554 -dumpfreq 479.325155414151 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.430760e-07, Dw=1.430760e-06, dt= 7.038776, rho=0.062525 , h=0.007812
+Dumping data at time t=485.675842
+Dg=1.430760e-07, Dw=1.430760e-06, dt= 7.038776, rho=0.062525 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 29.41 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-50-30-Data_0001.npz
+File saved at  npzs/sim/36-50-30-Data_0000.npz
+36-300-30
+Tumor: Dw = 164.31676725154983 mm^2/yr, p = 136.93063937629154 1/yr, T = 0.21908902300206642 yr, D/p = 1.2 mm^2, Tp = 30.0, sqrt(DT) = 6.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.004501829239768489 cm^2/d, p2 = 0.3751524366473741 1/yr, T2 = 79.96749339575425d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.004501829239768489 -rho 0.3751524366473741 -Tend 79.96749339575425 -dumpfreq 79.88752590235849 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=8.584561e-07, Dw=8.584561e-06, dt= 1.173129, rho=0.375152 , h=0.007812
+Dumping data at time t=80.945908
+Dg=8.584561e-07, Dw=8.584561e-06, dt= 1.173129, rho=0.375152 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 29.04 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/36-300-30-Data_0001.npz
+File saved at  npzs/sim/36-300-30-Data_0000.npz
+64-50-30
+Tumor: Dw = 36.51483716701107 mm^2/yr, p = 17.116329922036442 1/yr, T = 1.7527121840165314 yr, D/p = 2.1333333333333333 mm^2, Tp = 30.0, sqrt(DT) = 8.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0010004064977263308 cm^2/d, p2 = 0.04689405458092176 1/yr, T2 = 639.739947166034d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0010004064977263308 -rho 0.04689405458092176 -Tend 639.739947166034 -dumpfreq 639.1002072188679 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.907680e-07, Dw=1.907680e-06, dt= 5.279082, rho=0.046894 , h=0.007812
+Dumping data at time t=644.047363
+Dg=1.907680e-07, Dw=1.907680e-06, dt= 5.279082, rho=0.046894 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 36.73 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-50-30-Data_0001.npz
+File saved at  npzs/sim/64-50-30-Data_0000.npz
+64-300-30
+Tumor: Dw = 219.08902300206643 mm^2/yr, p = 102.69797953221865 1/yr, T = 0.2921186973360886 yr, D/p = 2.133333333333333 mm^2, Tp = 30.0, sqrt(DT) = 7.999999999999999, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.006002438986357985 cm^2/d, p2 = 0.2813643274855306 1/yr, T2 = 106.62332452767234d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.006002438986357985 -rho 0.2813643274855306 -Tend 106.62332452767234 -dumpfreq 106.51670120314466 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.144608e-06, Dw=1.144608e-05, dt= 0.879847, rho=0.281364 , h=0.007812
+Dumping data at time t=107.341263
+Dg=1.144608e-06, Dw=1.144608e-05, dt= 0.879847, rho=0.281364 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 38.94 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/64-300-30-Data_0001.npz
+File saved at  npzs/sim/64-300-30-Data_0000.npz
+100-50-30
+Tumor: Dw = 45.64354645876384 mm^2/yr, p = 13.693063937629152 1/yr, T = 2.1908902300206647 yr, D/p = 3.3333333333333335 mm^2, Tp = 30.0, sqrt(DT) = 10.0, v = 50.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.0012505081221579136 cm^2/d, p2 = 0.0375152436647374 1/yr, T2 = 799.6749339575426d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0012505081221579136 -rho 0.0375152436647374 -Tend 799.6749339575426 -dumpfreq 798.875259023585 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.384600e-07, Dw=2.384600e-06, dt= 4.223266, rho=0.037515 , h=0.007812
+Dumping data at time t=802.420593
+Dg=2.384600e-07, Dw=2.384600e-06, dt= 4.223266, rho=0.037515 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 52.98 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-50-30-Data_0001.npz
+File saved at  npzs/sim/100-50-30-Data_0000.npz
+100-300-30
+Tumor: Dw = 273.8612787525831 mm^2/yr, p = 82.15838362577492 1/yr, T = 0.3651483716701107 yr, D/p = 3.3333333333333335 mm^2, Tp = 29.999999999999996, sqrt(DT) = 10.0, v = 300.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+Inputting D2 = 0.007503048732947481 cm^2/d, p2 = 0.22509146198842442 1/yr, T2 = 133.2791556595904d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.007503048732947481 -rho 0.22509146198842442 -Tend 133.2791556595904 -dumpfreq 133.14587650393082 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=1.430760e-06, Dw=1.430760e-05, dt= 0.703878, rho=0.225091 , h=0.007812
+Dumping data at time t=133.736923
+Dg=1.430760e-06, Dw=1.430760e-05, dt= 0.703878, rho=0.225091 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 52.45 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/100-300-30-Data_0001.npz
+File saved at  npzs/sim/100-300-30-Data_0000.npz
+
