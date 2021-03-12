@@ -287,4 +287,10 @@ plt.savefig("pet2-std.png")
 #growth: 2801-12-55-55 (overfits early, so there will be probably another training with more regularization)
 #xyz: 0502-13-56-41 (training at the time of writing)
 
+#another growth training: 1302-19-01-21 (weight decay 0.1)
+#another growth training with different lr and lr_decay: 2102-11-21-56
+#training with 32 channels instead of 64: 2802-21-41-40 (you need to define a "_32" network function to train / evaluate this, was just an experiment)
+
+#testset mri evaluation in directory /mnt/Drive2/ivan_kevin/4-3-onlymri-testset
+
 
