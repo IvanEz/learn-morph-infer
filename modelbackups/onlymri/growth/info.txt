@@ -1,0 +1,1 @@
+/mnt/Drive2/ivan_kevin/log/torchimpl/1302-19-01-21-v7_1_mri-nonorm-batch32-wd1-mu1-mu2/epoch47.pt
