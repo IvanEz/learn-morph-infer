@@ -16,7 +16,7 @@ from torchsummary import summary_string
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
 
-def eval_run(num_epochs, model, train_generator, optimizer, device, lossfunction, writer, numberofbatches, step,
+def test(num_epochs, model, train_dataset, train_generator, optimizer, device, lossfunction, writer, numberofbatches, step,
               reduce_lr_on_flat, scheduler, val_generator, step_val, best_val_loss, savelogdir, writerval,
               dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate, starttrain, endtrain, startval,
               endval, version, schedulername, lossfunctionname, seed, is_debug, optimizername, weight_decay_sgd,

@@ -1,5 +1,4 @@
-#main.py and mycode.py are based on: https://github.com/rasbt/deeplearning-models of Sebastian Raschka, https://stanford.edu/~shervine/blog/pytorch-how-to-generate-data-parallel, https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py, https://github.com/ducha-aiki/caffenet-benchmark/blob/master/batchnorm.mdtor, https://github.com/pytorch/examples/blob/master/imagenet/main.py, PyTorch Tutorials on pytorch.org/tutorials
-
+#main.py and dataloader.py are based on: https://github.com/rasbt/deeplearning-models of Sebastian Raschka, https://stanford.edu/~shervine/blog/pytorch-how-to-generate-data-parallel, https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py, https://github.com/ducha-aiki/caffenet-benchmark/blob/master/batchnorm.mdtor, https://github.com/pytorch/examples/blob/master/imagenet/main.py, PyTorch Tutorials on pytorch.org/tutorials
 #torchsummary.py has been written by sksq96
 
 import time
@@ -23,8 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 from dataloader import *
 from network import *
 from train import *
-from eval import *
-
+from test import *
 
 seed = np.random.randint(0,10000000)
 torch.manual_seed(seed)
@@ -56,18 +54,19 @@ parser.add_argument('--weight_decay_sgd', default=0.0, type=float, help="weight 
 parser.add_argument('--lr_patience', default=10, type=int)
 parser.add_argument('--includesft', action='store_true', help="include or not fourier transform")
 parser.add_argument('--outputmode', default=0, type=int)
+parser.add_argument('--savelogdir', default="./result/", type=str)
 
-# --outputmode flag defines the outputs of the network
-# 0: uth1, uth2, lambda, mu, v, x, y, z (as is in latest versions)
-# 1: lambda,mu,v
-# 2: x,y,z
-# 3: lambda, mu
+
+#outputmode defines the outputs of the network
+#0: uth1, uth2, lambda, mu, v, x, y, z (as is in latest versions)
+#1: lambda,mu,v
+#2: x,y,z
+#3: lambda, mu
+#6: lambda, mu,x,y,z
 
 args = parser.parse_args()
 print(args)
-
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-
 
 ##########################
 ### SETTINGS
@@ -75,7 +74,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
 
 is_new_save = args.isnewsave
 is_debug = args.isdebug
-loaddir = args.loaddir
+loaddir = args.loaddir #choose directory from which to load from if is_new_save = False, do not end with '/'
 
 if not is_new_save:
     checkpoint = load_inverse_model(loaddir)
@@ -84,16 +83,13 @@ if not is_new_save:
 currenttime = datetime.now()
 currenttime = currenttime.strftime("%d%m-%H-%M-%S-")
 purpose = version + "-" + args.purpose
-#purpose = "resnetdeep-32000-dropout4-lr0005-exp75"
 
 # Device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
-# random_seed = 123
 learning_rate = args.lr #0.0001 was good
 num_epochs = args.num_epochs
-#batch_size = args.batch_size if is_new_save else checkpoint['batch_size']
 batch_size = args.batch_size
 num_workers = args.num_workers
 dropoutrate = args.dropoutrate if is_new_save else checkpoint['dropoutrate']
@@ -111,13 +107,9 @@ if is_new_save:
     outputmode = args.outputmode
 else:
     outputmode = checkpoint['outputmode']
-print(f"OUTPUT MODE: {outputmode}")
+print("OUTPUT MODE: {outputmode}")
 
-##########
-# Architecture and dataloading
-##########
-
-# numoutputs = 8 if is_new_save else checkpoint['numoutputs']
+# Defining the size of the output, see line 177 in dataloader.py
 if is_new_save:
     if outputmode == 0:
         numoutputs = 8
@@ -134,9 +126,34 @@ if is_new_save:
 else:
     numoutputs = checkpoint['numoutputs']
 
+# Dataloading
+starttrain = args.starttrain
+endtrain = args.endtrain #6400 / 16000 / 32000 / 64000 / 80000
+startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external validation: 80000
+endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
+
+train_dataset = Dataset2("/home/ivan/ib/learnmorph/samples_extended_thr2/Dataset/", starttrain, endtrain,
+                        "/home/ivan/ib/learnmorph/files", "/home/ivan/ib/learnmorph/necroticthrs",
+                         num_thresholds=num_thresholds, includesft=includesft,
+                         outputmode=outputmode)
+train_generator = torch.utils.data.DataLoader(train_dataset, 
+                    batch_size=batch_size, shuffle=True, num_workers=num_workers)
+
+val_dataset = Dataset2("/home/ivan/ib/learnmorph/samples_extended_thr2/Dataset/", startval, endval,
+                      "/home/ivan/ib/learnmorph/files", "/home/ivan/ib/learnmorph/necroticthrs",
+                       includesft=includesft, outputmode=outputmode)
+val_generator = torch.utils.data.DataLoader(val_dataset, 
+                    batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+if is_new_save:
+    assert len(train_dataset) % batch_size == 0
+    if len(val_dataset) % batch_size != 0:
+        print("WARNING: val dataset size is not multiple of batch size!")
+        time.sleep(30)
+
 # Setting up model
 if is_new_save:
-    savelogdir = '/mnt/Drive2/ivan_kevin/log/torchimpl/' + currenttime + purpose
+    savelogdir = '/home/ivan/ib/learnmorph/log/torchimpl/' + currenttime + purpose
     writer = SummaryWriter(log_dir = savelogdir)
     writerval = SummaryWriter(log_dir = savelogdir + '/val')
 
@@ -144,6 +161,23 @@ modelfun = NetConstant_noBN_64_n4_l4_inplacefull
 model = modelfun(numoutputs=numoutputs, dropoutrate=dropoutrate, includesft=includesft)
 modelfun_name = modelfun.__name__
 
+##### Summaries #####
+summarystring = repr(model)
+print(summarystring)
+
+if not includesft:
+    additionalsummary, _ = summary_string(model, (2,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
+else:
+    additionalsummary, _ = summary_string(model, (1, 129, 129, 129), device="cpu")
+print(additionalsummary)
+
+if is_new_save:
+    if not includesft:
+        writer.add_graph(model, Variable(torch.rand(1,2,129,129,129)))
+    else:
+        writer.add_graph(model, Variable(torch.rand(1, 1, 129, 129, 129)))
+
+##### Sending model to gpu, and defining oprtimizer
 if not is_new_save:
     model.load_state_dict(checkpoint['model_state_dict'])
 model = model.to(device)
@@ -161,62 +195,13 @@ optimizername = optimizer.__class__.__name__
 if not is_new_save:
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-# Dataloading
-starttrain = args.starttrain
-endtrain = args.endtrain #6400 / 16000 / 32000 / 64000 / 80000
-startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external validation: 80000
-endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
-
-train_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
-                         num_thresholds=num_thresholds, includesft=includesft,
-                         outputmode=outputmode)
-train_generator = torch.utils.data.DataLoader(train_dataset, 
-                    batch_size=batch_size, shuffle=True, num_workers=num_workers)
-
-val_dataset = Dataset2("/mnt/Drive2/ivan_kevin/samples_extended_thr2/Dataset/", startval, endval,
-                      "/mnt/Drive2/ivan_kevin/thresholds/files", "/mnt/Drive2/ivan_kevin/thresholds/necroticthrs",
-                       includesft=includesft, outputmode=outputmode)
-val_generator = torch.utils.data.DataLoader(val_dataset, 
-                    batch_size=batch_size, shuffle=False, num_workers=num_workers)
-
-#assert len(train_dataset) % batch_size == 0
-#assert len(val_dataset) % batch_size == 0
-print(len(train_generator))
-print(len(val_generator))
-time.sleep(10)
-if is_new_save:
-    assert len(train_dataset) % batch_size == 0
-    if len(val_dataset) % batch_size != 0:
-        print("WARNING: val dataset size is not multiple of batch size!")
-        time.sleep(30)
-
-# Summaries
-summarystring = repr(model)
-print(summarystring)
-
-if not includesft:
-    additionalsummary, _ = summary_string(model, (2,129,129,129), device="cpu") #additional summary is done on cpu (only once), model not yet on gpu
-else:
-    additionalsummary, _ = summary_string(model, (1, 129, 129, 129), device="cpu")
-print(additionalsummary)
-
-if is_new_save:
-    if not includesft:
-        writer.add_graph(model, Variable(torch.rand(1,2,129,129,129)))
-    else:
-        writer.add_graph(model, Variable(torch.rand(1, 1, 129, 129, 129)))
-
-#########
-# Training
-#########
-
+#################
+### Training
+#################
 step = 0 #1 step = 1 pass through 1 batch
 step_val = 0
-
 best_val_loss = 999999.0
 
-#scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.978)
 if not reduce_lr_on_flat:
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, lr_scheduler_rate) #0.95 - 0.978
 else:
@@ -231,18 +216,18 @@ lossfunction = F.mse_loss
 lossfunctionname = lossfunction.__name__
 
 if is_new_save:
-   train_run(num_epochs, model, train_generator, optimizer, device, lossfunction, writer, numberofbatches, step,
+    train(num_epochs, model, train_dataset, train_generator, optimizer, device, lossfunction, writer,
+              numberofbatches, step,
               reduce_lr_on_flat, scheduler, val_generator, step_val, best_val_loss, savelogdir, writerval,
               dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate, starttrain, endtrain, startval,
               endval, version, schedulername, lossfunctionname, seed, is_debug, optimizername, weight_decay_sgd,
               modelfun_name, lr_patience, includesft, outputmode, args, summarystring, additionalsummary
               )
-
 else:
-   eval_run((num_epochs, model, train_generator, optimizer, device, lossfunction, writer, numberofbatches, step,
-              reduce_lr_on_flat, scheduler, val_generator, step_val, best_val_loss, savelogdir, writerval,
-              dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate, starttrain, endtrain, startval,
-              endval, version, schedulername, lossfunctionname, seed, is_debug, optimizername, weight_decay_sgd,
-              modelfun_name, lr_patience, includesft, outputmode, args, summarystring, additionalsummary
-              )
-
+    test(num_epochs, model, train_dataset, train_generator, optimizer, device, lossfunction, writer,
+             numberofbatches, step,
+             reduce_lr_on_flat, scheduler, val_generator, step_val, best_val_loss, savelogdir, writerval,
+             dropoutrate, batch_size, numoutputs, learning_rate, lr_scheduler_rate, starttrain, endtrain, startval,
+             endval, version, schedulername, lossfunctionname, seed, is_debug, optimizername, weight_decay_sgd,
+             modelfun_name, lr_patience, includesft, outputmode, args, summarystring, additionalsummary
+             )

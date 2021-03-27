@@ -139,7 +139,7 @@ class Dataset2(Dataset):
             pet_volume_max = pet_volume.max()
             assert pet_volume_max >= 0.0
             if pet_volume_max == 0.0:
-                print(f"LIGHT WARNING: empty pet volume for {file_path}")
+                print("LIGHT WARNING: empty pet volume for {file_path}")
                 #no division by max, volume is left empty
             else:
                 pet_volume = pet_volume / pet_volume.max()
@@ -209,6 +209,13 @@ class Dataset2(Dataset):
                 paramsarray[0] = np.interp(params['Dw'], [0.0002, 0.015], normalization_range)
                 paramsarray[1] = np.interp(params['rho'], [0.002, 0.2], normalization_range)
                 paramsarray[2] = np.interp(params['Tend'], [50, 1500], normalization_range)
+            elif self.outputmode == 6:
+                paramsarray = np.zeros(5)
+                paramsarray[0] = np.interp(lambdaw, [np.sqrt(0.001), np.sqrt(7.5)], normalization_range)
+                paramsarray[1] = np.interp(mu, [0.1, 300.0], normalization_range)
+                paramsarray[2] = np.interp(params['icx'], [0.15, 0.7], normalization_range)
+                paramsarray[3] = np.interp(params['icy'], [0.2, 0.8], normalization_range)
+                paramsarray[4] = np.interp(params['icz'], [0.15, 0.7], normalization_range)
             else:
                 raise Exception("invalid output mode")
 
