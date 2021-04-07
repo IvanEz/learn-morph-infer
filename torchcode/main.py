@@ -62,7 +62,7 @@ parser.add_argument('--savelogdir', default="./result/", type=str)
 #1: lambda,mu,v
 #2: x,y,z
 #3: lambda, mu
-#6: lambda, mu,x,y,z
+#6: lambda, mu,x,y,z -> new outputmode
 
 args = parser.parse_args()
 print(args)
