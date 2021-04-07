@@ -121,6 +121,8 @@ if is_new_save:
         numoutputs = 2
     elif outputmode == 5:
         numoutputs = 3
+    elif outputmode == 6:
+        numoutputs = 5
     else:
         raise Exception("invalid output mode")
 else:
@@ -132,15 +134,20 @@ endtrain = args.endtrain #6400 / 16000 / 32000 / 64000 / 80000
 startval = args.startval #6400 / 16000 / 32000 / 64000 / 80000 - external validation: 80000
 endval = args.endval #7040 / 17600 - 17664 / 35200 / 70400 / 88000 - external validation: 88000
 
-train_dataset = Dataset2("/home/ivan/ib/learnmorph/samples_extended_thr2/Dataset/", starttrain, endtrain,
-                        "/home/ivan/ib/learnmorph/files", "/home/ivan/ib/learnmorph/necroticthrs",
+
+data_path="/home/ivan/ib/learnmorph/samples_extended_thr2/Dataset/"
+mri_threshold_path="/home/ivan/ib/learnmorph/files"
+necro_threshold_path="/home/ivan/ib/learnmorph/necroticthrs"
+
+train_dataset = Dataset2(data_path, starttrain, endtrain,
+                        mri_threshold_path, necro_threshold_path,
                          num_thresholds=num_thresholds, includesft=includesft,
                          outputmode=outputmode)
 train_generator = torch.utils.data.DataLoader(train_dataset, 
                     batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-val_dataset = Dataset2("/home/ivan/ib/learnmorph/samples_extended_thr2/Dataset/", startval, endval,
-                      "/home/ivan/ib/learnmorph/files", "/home/ivan/ib/learnmorph/necroticthrs",
+val_dataset = Dataset2(data_path, startval, endval,
+                      mri_threshold_path, necro_threshold_path,
                        includesft=includesft, outputmode=outputmode)
 val_generator = torch.utils.data.DataLoader(val_dataset, 
                     batch_size=batch_size, shuffle=False, num_workers=num_workers)
