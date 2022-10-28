@@ -1,0 +1,1 @@
+/mnt/Drive2/ivan_kevin/log/torchimpl/1401-21-45-28-v7_1-necr-normpet-nonorm-batch32-wd05-outputmode4/epoch50.pt

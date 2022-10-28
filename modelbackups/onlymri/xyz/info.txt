@@ -1,0 +1,1 @@
+/mnt/Drive2/ivan_kevin/log/torchimpl/0502-13-56-41-v7_1_mri-batch32-wd05-xyz/epoch66.pt

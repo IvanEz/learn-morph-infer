@@ -1,0 +1,96 @@
+(torchenv) ivan_kevins@ibbm_giga:/mnt/Drive2/ivan_kevin/differentv$ python3 tumorgen.py --sqrtTp 5 --sqrtDT 7
+Namespace(sqrtDT=7.0, sqrtTp=5.0, v=150.0)
+[105.0]
+[53.57142857142858]
+[0.4666666666666667]
+['7.0-150.0-5.0']
+7.0-150.0-5.0
+Tumor: Dw = 105.0 mm^2/yr, p = 53.57142857142858 1/yr, T = 0.4666666666666667 yr, D/p = 1.9599999999999997 mm^2, Tp = 25.000000000000004, sqrt(DT) = 7.0, sqrt(Tp) = 5.0 v = 150.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+parameter set in range
+Inputting D2 = 0.0028767123287671234 cm^2/d, p2 = 0.1467710371819961 1/yr, T2 = 170.33333333333334d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0028767123287671234 -rho 0.1467710371819961 -Tend 170.33333333333334 -dumpfreq 170.163 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=5.485617e-07, Dw=5.485617e-06, dt= 1.835856, rho=0.146771 , h=0.007812
+Dumping data at time t=170.734665
+Dg=5.485617e-07, Dw=5.485617e-06, dt= 1.835856, rho=0.146771 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 31.51 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/7.0-150.0-5.0-Data_0001.npz
+File saved at  npzs/sim/7.0-150.0-5.0-Data_0000.npz
+
+
+(torchenv) ivan_kevins@ibbm_giga:/mnt/Drive2/ivan_kevin/differentv$ python3 tumorgen.py --sqrtTp 3.7 --sqrtDT 12 --v 30
+Namespace(sqrtDT=12.0, sqrtTp=3.7, v=30.0)
+[48.648648648648646]
+[4.625]
+[2.9600000000000004]
+['12.0-30.0-3.7']
+12.0-30.0-3.7
+Tumor: Dw = 48.648648648648646 mm^2/yr, p = 4.625 1/yr, T = 2.9600000000000004 yr, D/p = 10.51862673484295 mm^2, Tp = 13.690000000000001, sqrt(DT) = 12.0, sqrt(Tp) = 3.7 v = 30.0 mm/yr, icx = 0.39078, icy = 0.4081, icz = 0.63007 
+
+parameter set in range
+Inputting D2 = 0.0013328396890040725 cm^2/d, p2 = 0.012671232876712329 1/yr, T2 = 1080.4d with command ./brain -model RD -PatFileName /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ -Dw 0.0013328396890040725 -rho 0.012671232876712329 -Tend 1080.4 -dumpfreq 1079.3196 -icx 0.39078 -icy 0.4081 -icz 0.63007 -vtk 1 -N 16 -adaptive 0
+
+
+       MRAG Launched         
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////          Glioma Reaction Diffusion           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+Set up: blockSize=8 Wavelets=ww (blocksPerDimension=16, maxLevel=4)
+Reading data from file: /mnt/Drive2/ivan_kevin/differentv/anatomy_dat/ 
+brainSizeX=193, brainSizeY=229, brainSizeZ=193 
+Characteristic Lenght L=22.900000 
+Dg=2.541599e-07, Dw=2.541599e-06, dt= 3.962388, rho=0.012671 , h=0.007812
+Dumping data at time t=1081.734863
+Dg=2.541599e-07, Dw=2.541599e-06, dt= 3.962388, rho=0.012671 , h=0.007812
+**** Dumping done
+
+
+ Run Finished 
+
+------Adios muchachos------
+we spent: 63.99 sec 
+
+MRAG Terminated
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+One Time computation for First File
+(0.0, 1.0, 0.0, 1.0, 0.0, 1.0) (2985984, 3) (5, 2985984)
+129, 129, 129
+vtus/sim/Data_0000.vtu
+vtus/sim/Data_0001.vtu
+(2985984, 5)
+(2985984, 5)
+File saved at  npzs/sim/12.0-30.0-3.7-Data_0001.npz
+File saved at  npzs/sim/12.0-30.0-3.7-Data_0000.npz
+
+
+
+with pet scan we can know not only the cell density inside the tumor, but it helps figuring out the tumor cell density outside of the t1gd scan (see example above)
