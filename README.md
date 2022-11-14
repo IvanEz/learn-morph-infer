@@ -2,7 +2,7 @@
 
 ![1-s2 0-S1361841522003000-ga1_lrg](https://user-images.githubusercontent.com/13185247/201695420-aab0fea8-fec3-47e9-98dc-e5f6c7d2d9ee.jpg)
 
-The code to the paper at MedIA [[LINK](https://t.co/R3IxrPrMFN)]
+The code to the paper at MedIA [[MedIA](https://t.co/R3IxrPrMFN)] [[arXiv](https://arxiv.org/abs/2111.04090)]   
 
 # Dependencies
 Pytorch >1.4
