@@ -8,4 +8,5 @@ Pickle5
 Tensorboard
 
 # Running
-just type ./run_training.sh in the terminal
+- go to **torchcode** folder 
+- just type ./run_training.sh in the terminal
