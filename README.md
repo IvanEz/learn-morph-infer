@@ -1,8 +1,8 @@
 # Learn-Morph-Infer: A new way of solving the inverse problem for brain tumor modeling" 
 
-![This is an image](https://ars.els-cdn.com/content/image/1-s2.0-S1361841522003000-ga1.sml)
+![1-s2 0-S1361841522003000-ga1_lrg](https://user-images.githubusercontent.com/13185247/201695420-aab0fea8-fec3-47e9-98dc-e5f6c7d2d9ee.jpg)
 
-The code to the paper at MedIA [https://t.co/R3IxrPrMFN]
+The code to the paper at MedIA [[LINK](https://t.co/R3IxrPrMFN)]
 
 # Dependencies
 Pytorch >1.4
