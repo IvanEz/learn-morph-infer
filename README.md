@@ -1,4 +1,4 @@
-# Learn-Morph-Infer: A new way of solving the inverse problem for brain tumor modeling" 
+# Learn-Morph-Infer: A new way of solving the inverse problem for brain tumor modeling 
 
 ![1-s2 0-S1361841522003000-ga1_lrg](https://user-images.githubusercontent.com/13185247/201695420-aab0fea8-fec3-47e9-98dc-e5f6c7d2d9ee.jpg)
 
@@ -20,3 +20,9 @@ for training:
 
 for testing:
 - type ./run_testing.sh in the terminal
+
+# Numerical brain tumor solvers
+The solvers used in our work can be found at:
+- [Reaction-diffusion model](https://github.com/JanaLipkova/GliomaSolver) 
+- [Reaction-advection-diffusion model](https://github.com/IvanEz/braintumorsolver)
+
