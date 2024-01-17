@@ -26,3 +26,6 @@ The solvers used in our work can be found at:
 - [Reaction-diffusion model](https://github.com/JanaLipkova/GliomaSolver) 
 - [Reaction-advection-diffusion model](https://github.com/IvanEz/braintumorsolver)
 
+# The dataset of 30k numerical tumor simulations can be found here:
+https://zenodo.org/records/10521625
+
