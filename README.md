@@ -28,3 +28,7 @@ The solvers used in our work can be found at:
 
 # Data
 The dataset of 30k numerical simulations can be found here: https://zenodo.org/records/10521625
+
+# Inference
+The inference script for arbitrary MRI scans can be found here: https://github.com/jonasw247/infer-LMI
+ 
